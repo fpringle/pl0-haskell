@@ -9,8 +9,8 @@ type Number = Int
 data Expression =
   UnaryPlus Term
   | UnaryMinus Term
-  | BinaryPlus Term Term
-  | BinaryMinus Term Term
+  | BinaryPlus Expression Term
+  | BinaryMinus Expression Term
   deriving (Show, Eq)
 
 data Term =
@@ -42,8 +42,8 @@ data Condition =
 data Statement =
   Set Identifier Expression
   | Call Identifier
-  | Question Identifier
-  | Bang Expression
+  | Input Identifier
+  | Output Expression
   | StmtBlock [Statement]
   | IfStmt Condition Statement
   | WhileStmt Condition Statement
@@ -56,4 +56,5 @@ data Block = Block {
   , body        :: Statement
   } deriving (Show, Eq)
 
-data Progran = Program Block
+data Program = Program Block
+  deriving (Show, Eq)
