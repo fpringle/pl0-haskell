@@ -6,19 +6,6 @@ import Lexer
 import Parser
 import Syntax
 
-prettyPrintBlock :: Block -> IO ()
-prettyPrintBlock = go 0
-  where
-    go ind b = do
-      let p s = putStrLn ((take ind $ repeat ' ') ++ s)
-      p "constant declarations:"
-      mapM_ (\(i,n) -> p ("  " ++ i ++ " := " ++ show n)) $ constDecls b
-      p "variable declarations:"
-      mapM_ (\i -> p ("  " ++ i)) $ varDecls b
-      p "body:"
-      p $ show $ body b
-      p "procedures:"
-      mapM_ (\(i, bl) -> p (i ++ ":") >> go (ind+4) bl) $ procDefs b
 
 
 main :: IO ()
