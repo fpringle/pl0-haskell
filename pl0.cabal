@@ -25,7 +25,9 @@ library
                         Syntax
                         Parser
                         Interpreter
-  -- other-modules:
+                        Compiler
+  other-modules:        Compiler.ThreeAddress
+                        Compiler.Intermediate
   -- other-extensions:
   build-depends:        base >=4.12 && <4.13
   hs-source-dirs:       src
