@@ -1,30 +1,37 @@
 module Main where
 
 import System.Environment
+import Control.Monad.Trans.State
 
 import Lexer
-import Parser
+import qualified Parser as P
 import Syntax
-
+import Interpreter
 
 
 main :: IO ()
 main = do
   args <- getArgs
   let progname = head args
-  putStrLn progname
   program <- readFile progname
   let tokenlist = lexPL0 program
   case tokenlist of
     Left err   -> putStrLn ("Error in lexing: " ++ err)
     Right list -> do
       -- mapM_ print list
-      case parse list of
+      case P.parse list of
         Left errors -> do
           putStrLn "Errors in parsing:"
           mapM_ putStrLn errors
         Right prog -> do
-          putStrLn "Parsed sucessfully:"
-          print prog
           let Program b = prog
-          prettyPrintBlock b
+          let machine = interpreter prog
+          finalState <- execStateT run machine
+          if hasError finalState
+          then do
+            putStrLn "Errors in execution:"
+            mapM_ (\e -> putStrLn ("  " ++ e)) $ errors finalState
+            putStrLn "Final machine state:"
+            prettyPrintScope finalState
+          else
+            return ()

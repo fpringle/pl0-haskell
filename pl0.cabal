@@ -16,6 +16,7 @@ common deps
   build-depends:        base >=4.12 && <4.13
                         , containers
                         , mtl
+                        , transformers
 
 library
   import:               deps
