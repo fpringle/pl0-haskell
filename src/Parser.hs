@@ -1,7 +1,7 @@
 module Parser where
 
 import Control.Monad.State
-
+import Data.Functor ((<&>))
 import qualified Token as T
 import qualified Syntax as S
 
@@ -29,10 +29,10 @@ parse tokens =
     else Left $ errors finalState
 
 peek :: ParserT T.Token
-peek = get >>= (return . head . stack)
+peek = get <&> (head . stack)
 
 empty :: ParserT Bool
-empty = get >>= (return . (== 0) . length . stack)
+empty = get <&> (null . stack)
 
 pop :: ParserT T.Token
 pop = do
@@ -52,18 +52,14 @@ assertTopEq :: T.Token -> ParserT Bool
 assertTopEq token = do
   top <- peek
   let res = top == token
-  if not res
-  then failure ("expected " ++ show token ++ " but got " ++ show top)
-  else return ()
+  unless res $ failure ("expected " ++ show token ++ " but got " ++ show top)
   return res
 
 assertTopType :: T.Token -> ParserT Bool
 assertTopType token = do
   top <- peek
   let res = T.sameType top token
-  if not res
-  then failure ("expected type " ++ show token ++ " but got " ++ show top)
-  else return ()
+  unless res $ failure ("expected type " ++ show token ++ " but got " ++ show top)
   return res
 
 popIdent :: ParserT S.Identifier
@@ -104,7 +100,7 @@ parseTerm :: ParserT S.Term
 parseTerm = do
   fac <- parseFactor
   let lhs = S.SingleFactor fac
-  parseTermRecursive $ lhs
+  parseTermRecursive lhs
 
 parseFactor :: ParserT S.Factor
 parseFactor = do
@@ -139,12 +135,11 @@ parseCondition :: ParserT S.Condition
 parseCondition = do
   top <- peek
   case top of
-    T.Odd -> pop >> parseExpression >>= return . S.Odd
+    T.Odd -> pop >> parseExpression <&> S.Odd
     _     -> do
       lhs <- parseExpression
-      op  <- parseOp
-      rhs <- parseExpression
-      return $ S.Comp lhs op rhs
+      op <- parseOp
+      S.Comp lhs op <$> parseExpression
 
 parseStatements :: ParserT [S.Statement]
 parseStatements = do
@@ -168,20 +163,16 @@ parseStatement = do
       pop
       assertTopEq T.ColonEquals
       pop
-      expr <- parseExpression
-      return $ S.Set id expr
+      S.Set id <$> parseExpression
     T.Call    -> do
       pop
-      ident <- popIdent
-      return $ S.Call ident
+      S.Call <$> popIdent
     T.Question -> do
       pop
-      ident <- popIdent
-      return $ S.Input ident
+      S.Input <$> popIdent
     T.Exclamation -> do
       pop
-      expr <- parseExpression
-      return $ S.Output expr
+      S.Output <$> parseExpression
     T.Begin -> do
       pop
       first <- parseStatement
@@ -192,15 +183,13 @@ parseStatement = do
       cond <- parseCondition
       assertTopEq T.Then
       pop
-      stmt <- parseStatement
-      return $ S.IfStmt cond stmt
+      S.IfStmt cond <$> parseStatement
     T.While -> do
       pop
       cond <- parseCondition
       assertTopEq T.Do
       pop
-      stmt <- parseStatement
-      return $ S.WhileStmt cond stmt
+      S.WhileStmt cond <$> parseStatement
     _ -> do
       failure ("bad first token for statement: " ++ show top)
       return (S.Call "")
@@ -241,8 +230,7 @@ parseConsts = do
           return []
 
 parseVar :: ParserT S.Identifier
-parseVar = do
-  popIdent
+parseVar = popIdent
 
 parseVars :: ParserT [S.Identifier]
 parseVars = do
@@ -296,8 +284,7 @@ parseBlock = do
   consts <- parseConsts
   vars <- parseVars
   procs <- parseProcs
-  stmt <- parseStatement
-  return $ S.Block consts vars procs stmt
+  S.Block consts vars procs <$> parseStatement
 
 parseProgram :: ParserT S.Program
 parseProgram = do

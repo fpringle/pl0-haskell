@@ -75,6 +75,7 @@ data Statement =
   | StmtBlock [Statement]
   | IfStmt Condition Statement
   | WhileStmt Condition Statement
+  | PopBlock      -- internall command used to return from procedure call
   deriving (Show, Eq)
 
 data Block = Block {
@@ -84,7 +85,7 @@ data Block = Block {
   , body        :: Statement
   } deriving (Show, Eq)
 
-data Program = Program Block
+newtype Program = Program Block
   deriving (Show, Eq)
 
 
@@ -93,7 +94,7 @@ prettyPrintBlock :: Block -> IO ()
 prettyPrintBlock = go 0
   where
     go ind b = do
-      let p s = putStrLn ((take ind $ repeat ' ') ++ s)
+      let p s = putStrLn (replicate ind ' ' ++ s)
       p "constant declarations:"
       mapM_ (\(i,n) -> p ("  " ++ i ++ " = " ++ show n)) $ constDecls b
       p "variable declarations:"
@@ -106,7 +107,7 @@ prettyPrintBlock = go 0
 prettyPrintStatement :: Int -> Statement -> IO ()
 prettyPrintStatement ind = format
   where
-    p x = putStrLn ((take ind $ repeat ' ') ++ x)
+    p x = putStrLn (replicate ind ' ' ++ x)
     format :: Statement -> IO ()
     format (Set id exp) = p (id ++ " := " ++ show exp)
     format (Call id) = p ("call " ++ id)
@@ -115,3 +116,4 @@ prettyPrintStatement ind = format
     format (StmtBlock s) = p "begin" >> mapM_ (prettyPrintStatement (ind+2)) s >> p "end"
     format (IfStmt cond s) = p ("if " ++ show cond) >> p "then" >> prettyPrintStatement (ind+2) s
     format (WhileStmt cond s) = p ("while " ++ show cond) >> p "do" >> prettyPrintStatement (ind+2) s
+    format PopBlock = p "return"

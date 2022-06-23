@@ -26,7 +26,8 @@ library
                         Parser
                         Interpreter
                         Compiler
-  other-modules:        Compiler.ThreeAddress
+  -- other-modules:
+                        Compiler.ThreeAddress
                         Compiler.Intermediate
   -- other-extensions:
   build-depends:        base >=4.12 && <4.13

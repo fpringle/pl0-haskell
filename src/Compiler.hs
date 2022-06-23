@@ -1,4 +1,4 @@
-module Compiler where
+module Compiler(getAllSymbols) where
 
 import Compiler.ThreeAddress
 import Compiler.Intermediate

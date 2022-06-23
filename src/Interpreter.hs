@@ -1,9 +1,11 @@
+{-# LANGUAGE TupleSections #-}
 module Interpreter where
 
+import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Text.Read (readMaybe)
-
+import Data.Functor ((<&>))
 import qualified Data.Map as Map
 
 import Syntax
@@ -77,11 +79,11 @@ prettyPrintScope s = do
   putStrLn "Tables:"
   print ts
   putStrLn "  consts:"
-  mapM_ (\t -> (mapM_ (\(id,val) -> putStrLn ("    " ++ id ++ " := " ++ show val)) $ Map.toList $ constants t) >> putStrLn "") ts
+  mapM_ (\t -> mapM_ (\(id,val) -> putStrLn ("    " ++ id ++ " := " ++ show val)) (Map.toList $ constants t) >> putStrLn "") ts
   putStrLn "  vars:"
-  mapM_ (\t -> (mapM_ (\(id,val) -> putStrLn ("    " ++ id ++ " = " ++ show val)) $ Map.toList $ variables t) >> putStrLn "") ts
+  mapM_ (\t -> mapM_ (\(id,val) -> putStrLn ("    " ++ id ++ " = " ++ show val)) (Map.toList $ variables t) >> putStrLn "") ts
   putStrLn "  procs:"
-  mapM_ (\t -> (mapM_ (\(f,_) -> putStrLn ("    " ++ f)) $ Map.toList $ functions t) >> putStrLn "") ts
+  mapM_ (\t -> mapM_ (\(f,_) -> putStrLn ("    " ++ f)) (Map.toList $ functions t) >> putStrLn "") ts
 
 type Interpreter a = StateT Scope IO a
 
@@ -94,7 +96,7 @@ run = do
   case statements cur of
     []  -> return ()
     (stmt:rest) -> do
-      (put $ cur { statements = rest })
+      put $ cur { statements = rest }
       -- lift $ putStrLn ("executing statement: " ++ show stmt)
       executeStmt stmt
       run
@@ -105,15 +107,16 @@ pushBlock s b =
     ts = tables s
     ss = statements s
     consts = Map.fromList $ constDecls b
-    vars   = Map.fromList $ map (\id -> (id, Nothing)) $ varDecls b
+    vars   = Map.fromList $ map (, Nothing) $ varDecls b
     funcs  = Map.fromList $ procDefs b
-    newts = (SymbolTable consts vars funcs) : ts
+    newts = SymbolTable consts vars funcs : ts
   in
-    s { tables = newts, statements = (body b):ss }
+    s { tables = newts, statements = body b:PopBlock:ss }
 
 popBlock :: Scope -> Scope
 popBlock (Scope (t:ts) (s:ss) errs haserr) = Scope ts ss errs haserr
-popBlock _ = error "trying to pop from main block"
+-- popBlock _ = error "trying to pop from main block"
+popBlock s = s
 
 evaluateFactor :: [SymbolTable] -> Factor -> Either String Int
 evaluateFactor ts (Ident id) = lookupSymbolInTables id ts
@@ -146,7 +149,7 @@ evaluateTerm ts (Div t f) = do
   return (lhs `div` rhs)
 
 evaluateCondition :: [SymbolTable] -> Condition -> Either String Bool
-evaluateCondition ts (Odd e) = evaluateExpression ts e >>= return . not . even
+evaluateCondition ts (Odd e) = evaluateExpression ts e <&> odd
 evaluateCondition ts (Comp e1 o e2) = do
   lhs <- evaluateExpression ts e1
   rhs <- evaluateExpression ts e2
@@ -176,11 +179,11 @@ executeStmt (Call id) = do
   let ts = tables cur
   case lookupFunctionInTables id ts of
     Left error  -> appendError error
-    Right block -> modify (\cur -> pushBlock cur block)
+    Right block -> modify (`pushBlock` block)
 
 executeStmt (Input id) = do
   lift $ putStrLn ("Enter " ++ id ++ ":")
-  line <- lift $ getLine
+  line <- lift getLine
   case readMaybe line :: Maybe Int of
     Nothing   -> appendError ("Invalid number input: " ++ line)
     Just val  -> do
@@ -197,17 +200,6 @@ executeStmt (Output exp) = do
     Left error -> appendError error
     Right val -> lift $ print val
 
-{-
-executeStmt (StmtBlock stmts) = helper stmts
-  where
-    helper [] = return ()
-    helper (stmt:rest) = do
-      executeStmt stmt
-      cur <- get
-      if hasError cur
-      then return ()
-      else helper rest
--}
 executeStmt (StmtBlock stmts) = modify (\cur -> cur { statements = stmts ++ statements cur})
 
 executeStmt (IfStmt cond stmt) = do
@@ -215,15 +207,13 @@ executeStmt (IfStmt cond stmt) = do
   let ts = tables cur
   case evaluateCondition ts cond of
     Left err -> appendError err
-    Right bool -> if bool
-                  then modify (\cur2 -> cur2 { statements = stmt : statements cur2})
-                  else return ()
+    Right bool -> when bool $ modify (\cur2 -> cur2 { statements = stmt : statements cur2})
 
 executeStmt (WhileStmt cond stmt) = do
   cur <- get
   let ts = tables cur
   case evaluateCondition ts cond of
     Left err -> appendError err
-    Right bool -> if bool
-                  then modify (\cur2 -> cur2 { statements = stmt : (WhileStmt cond stmt) : statements cur2})
-                  else return ()
+    Right bool -> when bool $ modify (\cur2 -> cur2 { statements = stmt : WhileStmt cond stmt : statements cur2})
+
+executeStmt PopBlock = modify popBlock

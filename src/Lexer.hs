@@ -65,7 +65,6 @@ lexFirst ('(':rest) = Right (OpenParen, rest)
 lexFirst (')':rest) = Right (CloseParen, rest)
 -- values
 lexFirst (first:rest)
-  -- | first == '0'                    = Left "Number starting with zero"
   | isLetter first || first == '_'  = lexIdent [first] rest
   | isDigit first                   = lexNumber [first] rest
   | otherwise                       = Left ("Invalid token first char: " ++ show first)

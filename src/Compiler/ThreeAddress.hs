@@ -1,17 +1,19 @@
 module Compiler.ThreeAddress where
 
-type Symbol = String
 type Label = String
+type Address = Int
 
 data Value =
   Number Int
-  | Var Symbol
+  | Addr Address
+  deriving (Show, Eq)
 
 data Op =
   Add
   | Sub
   | Mul
   | Div
+  deriving (Show, Eq)
 
 data Comp =
   LT
@@ -20,14 +22,15 @@ data Comp =
   | GTE
   | EQ
   | NE
-
-data Condition = 
-  Unconditional
-  | Compare Value Comp Value
+  deriving (Show, Eq)
 
 data ThreeAddr =
-  Arith Symbol Value Op Value       -- s1 = s2 OP s3
-  | Jump Condition Label            -- if cond, jump to label
-  | Marker Label                    -- label:
-  | Print Value                     -- write value
-  | Read Symbol                     -- sym = read
+  Move Address Value
+  | Jnz Value Label
+  | Arith Address Value Op Value
+  | Compare Address Value Comp Value
+  | Not Address Value
+  | Marker Label
+  | Print Value
+  | Read Address
+  deriving (Show, Eq)

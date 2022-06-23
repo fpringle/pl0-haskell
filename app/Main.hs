@@ -7,6 +7,7 @@ import Lexer
 import qualified Parser as P
 import Syntax
 import Interpreter
+import Compiler
 
 
 main :: IO ()
@@ -24,7 +25,23 @@ main = do
           putStrLn "Errors in parsing:"
           mapM_ putStrLn errors
         Right prog -> do
+{-
           let Program b = prog
+          let machine = interpreter prog
+          finalState <- execStateT run machine
+          if hasError finalState
+          then do
+            putStrLn "Errors in execution:"
+            mapM_ (\e -> putStrLn ("  " ++ e)) $ errors finalState
+            putStrLn "Final machine state:"
+            prettyPrintScope finalState
+          else
+            return ()
+-}
+          let Program b = prog
+          prettyPrintBlock b
+          let scopedIDs = getAllSymbols prog
+          mapM_ print scopedIDs
           let machine = interpreter prog
           finalState <- execStateT run machine
           if hasError finalState
