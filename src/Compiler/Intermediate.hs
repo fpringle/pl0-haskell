@@ -14,10 +14,10 @@ import Compiler.ThreeAddress
 
 -- this module needs to turn S.Program -> Program
 
-type Index = Int
+type LabelMap = Map.Map Label Index
 
 data Program = Program {
-  labels              :: Map.Map Label Index  -- maps labels to their index in "instructions"
+  labels              :: LabelMap  -- maps labels to their index in "instructions"
   , dataRange         :: (Int, Int)
   } deriving (Show, Eq)
 
@@ -137,7 +137,6 @@ instance TempEval (S.Factor ScopedIdentifier) where
   _tempEval start smap (S.Parens e) = _tempEval start smap e
 
 instance TempEval (S.Term ScopedIdentifier) where
-  _tempEval start smap (S.SingleFactor (S.Ident id)) = error "this should never have been called (_tempEval _ _ (S.SingleFactor S.Ident id))"
   _tempEval start smap (S.SingleFactor f) = _tempEval start smap f
 
   _tempEval start smap (S.Mul t f) =
@@ -206,4 +205,69 @@ instance TempEval (S.Condition ScopedIdentifier) where
       convOp S.OP_EQ = EQ
       convOp S.OP_HASH = NE
 
+instance TempEval Value where
+  _tempEval start smap v = ([], start, v)
 
+nullValue :: Value
+nullValue = error "null"
+
+instance TempEval (S.Statement ScopedIdentifier) where
+  _tempEval start smap (S.Set id e) =
+    let
+      (cmds, ns, res) = _tempEval start smap e
+    in case Map.lookup id smap of
+      Just addr   -> (cmds ++ [Move (Normal addr) res], ns, nullValue)
+      Nothing     -> error ("unknown symbol: " ++ show id)
+
+  _tempEval start smap (S.Call id) =
+    ([Call $ show id], start, nullValue)
+
+  _tempEval start smap (S.Input id) =
+    case Map.lookup id smap of
+      Just addr   -> ([Read $ Normal addr], start, nullValue)
+      Nothing     -> error ("unknown symbol: " ++ show id)
+
+  _tempEval start smap (S.Output e) =
+    let
+      (cmds, ns, res) = _tempEval start smap e
+    in
+      (cmds ++ [Print res], ns, nullValue)
+
+  _tempEval start smap (S.StmtBlock stmts) = foldl helper ([], start, nullValue) stmts
+    where
+      helper :: ([ThreeAddr], Int, Value) -> S.Statement ScopedIdentifier -> ([ThreeAddr], Int, Value)
+      helper (cmds, startAddr, _) stmt =
+        let (stmtCmds, ns, _) = _tempEval start smap stmt
+        in (cmds ++ stmtCmds, ns, nullValue)
+
+  _tempEval start smap (S.IfStmt cond stmt) = error "todo"
+
+  _tempEval start smap (S.WhileStmt cond stmt) = error "todo"
+
+  _tempEval start smap S.PopBlock = ([Return], start, nullValue)
+
+instance TempEval (S.Block ScopedIdentifier) where
+  _tempEval start smap block =
+    let
+      c = S.constDecls block
+      p = S.procDefs block
+      b = S.body block
+      constCmds = map helper1 c
+      (procCmds, ns1, _) = foldl helper2 ([], start, nullValue) p
+      main = Marker "MAIN"
+      jumpToMain = Jnz (Number 1) (Named "MAIN")
+      (bodyCmds, ns2, _) = _tempEval ns1 smap b
+    in
+      (constCmds ++ [jumpToMain] ++ procCmds ++ [main] ++ bodyCmds, ns2, nullValue)
+
+    where
+      helper1 :: (ScopedIdentifier, S.Number) -> ThreeAddr
+      helper1 (id, val) =
+        case Map.lookup id smap of
+          Just addr   -> Move (Normal addr) (Number val)
+          Nothing     -> error ("unknown symbol: " ++ show id)
+
+      helper2 :: ([ThreeAddr], Int, Value) -> (ScopedIdentifier, S.Block ScopedIdentifier) -> ([ThreeAddr], Int, Value)
+      helper2 (cmds, ns, _) (name, bl) =
+        let (blockCmds, nss, _) = _tempEval ns smap bl
+        in (cmds ++ [Marker $ show name] ++ blockCmds ++ [Return], nss, nullValue)

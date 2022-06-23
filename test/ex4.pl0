@@ -1,0 +1,13 @@
+const pow = 2;
+var x, squ, res;
+
+procedure square;
+begin
+    squ := x * x
+end;
+
+begin
+    ? x;
+    call square;
+    ! squ
+end.

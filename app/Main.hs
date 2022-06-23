@@ -41,11 +41,19 @@ main = do
           putStrLn "#######################################################"
           putStrLn "original program:"
           prettyPrintBlock b
+
           let scopedIDs = getAllSymbols prog
           putStrLn "#######################################################"
           putStrLn "scoped IDs:"
           mapM_ print scopedIDs
+
           let transformed = transformBlock scopedIDs b
           putStrLn "#######################################################"
           putStrLn "transformed program:"
           prettyPrintBlock transformed
+  
+          let smap = mapSymbolsToAddresses scopedIDs
+          let (cmds, _, _) = tempEval smap transformed
+          putStrLn "#######################################################"
+          putStrLn "assembly:"
+          mapM_ print cmds
