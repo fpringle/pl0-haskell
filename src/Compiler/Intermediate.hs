@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 module Compiler.Intermediate where
 
 import qualified Data.Map as Map
@@ -26,6 +27,7 @@ instance Show ScopedIdentifier where
   show (ScopedIdentifier scopes id) =
     intercalate "." (scopes ++ ["'" ++ id ++ "'"])
 
+type SymbolMap = Map.Map ScopedIdentifier Address
 
 topLevel :: S.Identifier -> ScopedIdentifier
 topLevel = ScopedIdentifier []
@@ -49,8 +51,8 @@ getBlockSymbols b =
 getAllSymbols :: S.Program S.Identifier -> [ScopedIdentifier]
 getAllSymbols (S.Program b) = getBlockSymbols b
 
-mapSymbolsToAddresses :: [ScopedIdentifier] -> Map.Map ScopedIdentifier Address
-mapSymbolsToAddresses ids = Map.fromList $ zip ids [0..]
+mapSymbolsToAddresses :: [ScopedIdentifier] -> SymbolMap 
+mapSymbolsToAddresses ids = Map.fromList $ zip ids $ map Normal [0..]
 
 filterScope :: [ScopedIdentifier] -> S.Identifier -> [ScopedIdentifier]
 filterScope scopedIDs scope = filter isScope scopedIDs
@@ -98,3 +100,66 @@ transformBlock s = helper s s []
 
 transformSymbols :: [ScopedIdentifier] -> S.Program S.Identifier -> S.Program ScopedIdentifier
 transformSymbols s (S.Program b) = S.Program $ transformBlock s b
+
+class TempEval a where
+  -- _tempEval startAddr smap x returns a triple (cmds, newStartAddr) where
+  --  startAddr is the first index of temporary space that the expression needs
+  --    access to
+  --  smap is a mapping of scoped symbols to permanent addresses
+  --  x is the expression to evaluate
+  --  cmds is the sequence of ThreeAddress commands that evaluates the expression
+  --  newStartAddr is the next temp address not used by the expression
+  --  address newStartAddr-1 contains the result of the expression
+  _tempEval :: Int -> SymbolMap -> a -> ([ThreeAddr], Int)
+  
+  tempEval :: SymbolMap -> a -> ([ThreeAddr], Int)
+  tempEval = _tempEval 0
+
+tempV :: Int -> Value
+tempV = Addr . Temporary
+
+instance TempEval (S.Factor ScopedIdentifier) where
+  _tempEval start smap (S.Ident id) = ([], start)
+  _tempEval start smap (S.Num n) = ([Move (Temporary start) (Number n)], start+1)
+  _tempEval start smap (S.Parens e) = _tempEval start smap e
+
+instance TempEval (S.Term ScopedIdentifier) where
+  _tempEval start smap (S.SingleFactor f) = _tempEval start smap f
+  _tempEval start smap (S.Mul t f) =
+    let
+      (cmds1, ns1) = _tempEval start smap t
+      (cmds2, ns2) = _tempEval ns1 smap f
+      finalCmd = Arith (Temporary ns2) (tempV (ns1-1)) Mul (tempV (ns2-1))
+    in
+      (cmds1 ++ cmds2 ++ [finalCmd], ns2+1)
+  _tempEval start smap (S.Div t f) =
+    let
+      (cmds1, ns1) = _tempEval start smap t
+      (cmds2, ns2) = _tempEval ns1 smap f
+      finalCmd = Arith (Temporary ns2) (tempV (ns1-1)) Div (tempV (ns2-1))
+    in
+      (cmds1 ++ cmds2 ++ [finalCmd], ns2+1)
+
+instance TempEval (S.Expression ScopedIdentifier) where
+  _tempEval start smap (S.UnaryPlus t) = _tempEval start smap t
+  _tempEval start smap (S.UnaryMinus t) =
+    let
+      (cmds, ns) = _tempEval start smap t
+      cmd = Arith (Temporary ns) (Number 0) Sub (tempV (ns-1))
+    in
+      (cmds ++ [cmd], ns+1)
+  _tempEval start smap (S.BinaryPlus e t) =
+    let
+      (cmds1, ns1) = _tempEval start smap e
+      (cmds2, ns2) = _tempEval ns1 smap t
+      finalCmd = Arith (Temporary ns2) (tempV (ns1-1)) Add (tempV (ns2-1))
+    in
+      (cmds1 ++ cmds2 ++ [finalCmd], ns2+1)
+
+  _tempEval start smap (S.BinaryMinus e t) =
+    let
+      (cmds1, ns1) = _tempEval start smap e
+      (cmds2, ns2) = _tempEval ns1 smap t
+      finalCmd = Arith (Temporary ns2) (tempV (ns1-1)) Sub (tempV (ns2-1))
+    in
+      (cmds1 ++ cmds2 ++ [finalCmd], ns2+1)

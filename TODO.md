@@ -1,3 +1,6 @@
 - check validity of program
     - some programs may be syntactically correct but semantically invalid
     - e.g. a block that defines a constant and a variable with the same name
+- test suite
+    - check that interpreter and intermediate language do the same thing
+    - pl/0 programs to check functionality, automated runner

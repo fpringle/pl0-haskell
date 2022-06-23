@@ -1,7 +1,11 @@
 module Compiler.ThreeAddress where
 
 type Label = String
-type Address = Int
+
+data Address =
+  Normal Int
+  | Temporary Int
+  deriving (Show, Eq)
 
 data Value =
   Number Int
