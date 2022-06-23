@@ -16,7 +16,7 @@ type IdMap a = Map.Map Identifier a
 data SymbolTable = SymbolTable {
   constants         :: IdMap Int
   , variables       :: IdMap (Maybe Int)
-  , functions       :: IdMap Block
+  , functions       :: IdMap (Block Identifier)
   } deriving (Show)
 
 lookupSymbolInTable :: Identifier -> SymbolTable -> Either String Int
@@ -35,13 +35,13 @@ lookupSymbolInTables id (t:ts) =
     Right num -> Right num
     _         -> lookupSymbolInTables id ts
 
-lookupFunctionInTable :: Identifier -> SymbolTable -> Either String Block
+lookupFunctionInTable :: Identifier -> SymbolTable -> Either String (Block Identifier)
 lookupFunctionInTable id table =
   case Map.lookup id $ functions table of
     Just block   -> Right block
     Nothing      -> Left ("unknown procedure: " ++ id)
 
-lookupFunctionInTables :: Identifier -> [SymbolTable] -> Either String Block
+lookupFunctionInTables :: Identifier -> [SymbolTable] -> Either String (Block Identifier)
 lookupFunctionInTables id [] = Left ("unknown function: " ++ id)
 lookupFunctionInTables id (t:ts) = 
   case lookupFunctionInTable id t of
@@ -68,7 +68,7 @@ modifySymbolInTables id val (t:ts) =
 
 data Scope = Scope {
   tables        :: [SymbolTable]
-  , statements  :: [Statement]
+  , statements  :: [Statement Identifier]
   , errors      :: [String]
   , hasError    :: Bool
   }
@@ -87,7 +87,7 @@ prettyPrintScope s = do
 
 type Interpreter a = StateT Scope IO a
 
-interpreter :: Program -> Scope
+interpreter :: Program Identifier -> Scope
 interpreter (Program b) = pushBlock (Scope [] [] [] False) b
 
 run :: Interpreter ()
@@ -101,7 +101,7 @@ run = do
       executeStmt stmt
       run
 
-pushBlock :: Scope -> Block -> Scope
+pushBlock :: Scope -> Block Identifier -> Scope
 pushBlock s b =
   let
     ts = tables s
@@ -118,12 +118,12 @@ popBlock (Scope (t:ts) (s:ss) errs haserr) = Scope ts ss errs haserr
 -- popBlock _ = error "trying to pop from main block"
 popBlock s = s
 
-evaluateFactor :: [SymbolTable] -> Factor -> Either String Int
+evaluateFactor :: [SymbolTable] -> Factor Identifier -> Either String Int
 evaluateFactor ts (Ident id) = lookupSymbolInTables id ts
 evaluateFactor ts (Num n)    = Right n
 evaluateFactor ts (Parens e) = evaluateExpression ts e
 
-evaluateExpression :: [SymbolTable] -> Expression -> Either String Int
+evaluateExpression :: [SymbolTable] -> Expression Identifier -> Either String Int
 evaluateExpression ts (UnaryPlus t) = evaluateTerm ts t
 evaluateExpression ts (UnaryMinus t) = do
   tosub <- evaluateTerm ts t
@@ -137,7 +137,7 @@ evaluateExpression ts (BinaryMinus e t) = do
   rhs <- evaluateTerm ts t
   return (lhs - rhs)
 
-evaluateTerm :: [SymbolTable] -> Term -> Either String Int
+evaluateTerm :: [SymbolTable] -> Term Identifier -> Either String Int
 evaluateTerm ts (SingleFactor f) = evaluateFactor ts f
 evaluateTerm ts (Mul t f) = do
   lhs <- evaluateTerm ts t
@@ -148,7 +148,7 @@ evaluateTerm ts (Div t f) = do
   rhs <- evaluateFactor ts f
   return (lhs `div` rhs)
 
-evaluateCondition :: [SymbolTable] -> Condition -> Either String Bool
+evaluateCondition :: [SymbolTable] -> Condition Identifier -> Either String Bool
 evaluateCondition ts (Odd e) = evaluateExpression ts e <&> odd
 evaluateCondition ts (Comp e1 o e2) = do
   lhs <- evaluateExpression ts e1
@@ -164,7 +164,7 @@ evaluateCondition ts (Comp e1 o e2) = do
 appendError :: String -> Interpreter ()
 appendError s = modify (\cur -> cur { hasError = True, errors = errors cur ++ [s] })
 
-executeStmt :: Statement -> Interpreter ()
+executeStmt :: Statement Identifier -> Interpreter ()
 executeStmt (Set id exp) = do
   cur <- get
   let ts = tables cur

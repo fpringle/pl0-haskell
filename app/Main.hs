@@ -1,6 +1,7 @@
 module Main where
 
 import System.Environment
+import Control.Monad
 import Control.Monad.Trans.State
 
 import Lexer
@@ -18,9 +19,7 @@ main = do
   let tokenlist = lexPL0 program
   case tokenlist of
     Left err   -> putStrLn ("Error in lexing: " ++ err)
-    Right list -> do
-      -- mapM_ print list
-      case P.parse list of
+    Right list -> case P.parse list of
         Left errors -> do
           putStrLn "Errors in parsing:"
           mapM_ putStrLn errors
@@ -39,16 +38,14 @@ main = do
             return ()
 -}
           let Program b = prog
+          putStrLn "#######################################################"
+          putStrLn "original program:"
           prettyPrintBlock b
           let scopedIDs = getAllSymbols prog
+          putStrLn "#######################################################"
+          putStrLn "scoped IDs:"
           mapM_ print scopedIDs
-          let machine = interpreter prog
-          finalState <- execStateT run machine
-          if hasError finalState
-          then do
-            putStrLn "Errors in execution:"
-            mapM_ (\e -> putStrLn ("  " ++ e)) $ errors finalState
-            putStrLn "Final machine state:"
-            prettyPrintScope finalState
-          else
-            return ()
+          let transformed = transformBlock scopedIDs b
+          putStrLn "#######################################################"
+          putStrLn "transformed program:"
+          prettyPrintBlock transformed
