@@ -34,6 +34,7 @@ data ThreeAddr =
   | Arith Address Value Op Value
   | Compare Address Value Comp Value
   | Not Address Value
+  | Odd Address Value
   | Marker Label
   | Print Value
   | Read Address
