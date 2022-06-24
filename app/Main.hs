@@ -56,7 +56,7 @@ main = do
           let (cmds, _, _, _, _) = eval smap transformed
           putStrLn "#######################################################"
           putStrLn "assembly:"
-          mapM_ (\c -> let s = show c in putStrLn (if elem ':' s then '\n':s else s)) cmds
+          mapM_ (\c -> let s = show c in putStrLn (if ':' `elem` s then '\n':s else s)) cmds
           when (length args > 1) $ do
             let oname = head $ tail args
             mapM_ (\c -> appendFile oname (show c ++ "\n")) cmds
