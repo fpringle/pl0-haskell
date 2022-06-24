@@ -206,75 +206,93 @@ instance TempEval (S.Condition ScopedIdentifier) where
       convOp S.OP_EQ = EQ
       convOp S.OP_HASH = NE
 
-instance TempEval Value where
-  _tempEval start smap v = ([], start, v)
-
 nullValue :: Value
 nullValue = error "null"
 
-instance TempEval (S.Statement ScopedIdentifier) where
-  _tempEval start smap (S.Set id e) =
+class Eval a where
+  -- _eval curIf curWhile startAddr smap x returns a triple (cmds, newStartAddr, nextIf, nextWhile, resultAddr) where
+  -- curIf is the index of the next available 'if' label
+  -- curWhile is the index of the next available 'while' label
+  --  startAddr is the first index of temporary space that the expression needs
+  --    access to
+  --  smap is a mapping of scoped symbols to permanent addresses
+  --  x is the expression to evaluate
+  --  cmds is the sequence of ThreeAddress commands that evaluates the expression
+  --  newStartAddr is the next temp address not used by the expression
+  --  nextIf is the index of the next available 'if' label
+  --  nextWhile is the index of the next available 'while' label
+  --  address resultAddr contains the result of the expression
+  _eval :: Int -> Int -> Int -> SymbolMap -> a -> ([ThreeAddr], Int, Int, Int, Value)
+  
+  eval :: SymbolMap -> a -> ([ThreeAddr], Int, Int, Int, Value)
+  eval = _eval 0 0 0
+
+instance Eval (S.Statement ScopedIdentifier) where
+  _eval start curIf curWhile smap (S.Set id e) =
     let
       (cmds, ns, res) = _tempEval start smap e
     in case Map.lookup id smap of
-      Just addr   -> (cmds ++ [Move (Normal addr) res], ns, nullValue)
+      Just addr   -> (cmds ++ [Move (Normal addr) res], ns, curIf, curWhile, nullValue)
       Nothing     -> error ("unknown symbol: " ++ show id)
 
-  _tempEval start smap (S.Call id) =
-    ([Call $ show id], start, nullValue)
+  _eval start curIf curWhile smap (S.Call id) =
+    ([Call $ show id], start, curIf, curWhile, nullValue)
 
-  _tempEval start smap (S.Input id) =
+  _eval start curIf curWhile smap (S.Input id) =
     case Map.lookup id smap of
-      Just addr   -> ([Read $ Normal addr], start, nullValue)
+      Just addr   -> ([Read $ Normal addr], start, curIf, curWhile, nullValue)
       Nothing     -> error ("unknown symbol: " ++ show id)
 
-  _tempEval start smap (S.Output e) =
+  _eval start curIf curWhile smap (S.Output e) =
     let
       (cmds, ns, res) = _tempEval start smap e
     in
-      (cmds ++ [Print res], ns, nullValue)
+      (cmds ++ [Print res], ns, curIf, curWhile, nullValue)
 
-  _tempEval start smap (S.StmtBlock stmts) = foldl helper ([], start, nullValue) stmts
+  _eval start curIf curWhile smap (S.StmtBlock stmts) = foldl helper ([], start, curIf, curWhile, nullValue) stmts
     where
-      helper :: ([ThreeAddr], Int, Value) -> S.Statement ScopedIdentifier -> ([ThreeAddr], Int, Value)
-      helper (cmds, startAddr, _) stmt =
-        let (stmtCmds, ns, _) = _tempEval start smap stmt
-        in (cmds ++ stmtCmds, ns, nullValue)
+      helper :: ([ThreeAddr], Int, Int, Int, Value) -> S.Statement ScopedIdentifier -> ([ThreeAddr], Int, Int, Int, Value)
+      helper (cmds, startAddr, ci, cw, _) stmt =
+        let (stmtCmds, ns, ni, nw, _) = _eval start ci cw smap stmt
+        in (cmds ++ stmtCmds, ns, ni, nw, nullValue)
 
-  _tempEval start smap (S.IfStmt cond stmt) =
+  _eval start curIf curWhile smap (S.IfStmt cond stmt) =
     let
       (cmds, ns, res) = _tempEval start smap cond
       neg = Not (Temporary ns) res
-      end = Named "ENDIF"
+      endl = "ENDIF" ++ show curIf
+      end = Named endl
       jmp = Jnz (tempV ns) end
-      (scmds, ns2, _) = _tempEval (ns+1) smap stmt
-    in (cmds ++ [neg, jmp] ++ scmds ++ [Marker "ENDIF"], ns2, nullValue)
+      (scmds, ns2, ni, nw, _) = _eval (ns+1) (curIf+1) curWhile smap stmt
+    in (cmds ++ [neg, jmp] ++ scmds ++ [Marker endl], ns2, ni, nw, nullValue)
 
-  _tempEval start smap (S.WhileStmt cond stmt) =
+  _eval start curIf curWhile smap (S.WhileStmt cond stmt) =
     let
       (cmds, ns, res) = _tempEval start smap cond
       neg = Not (Temporary ns) res
-      loop = Named "LOOP"
-      end = Named "ENDWHILE"
+      endw = "ENDWHILE" ++ show curWhile
+      l = "LOOP" ++ show curWhile
+      loop = Named l
+      end = Named endw
       jmp = Jnz (tempV ns) end
-      (scmds, ns2, _) = _tempEval (ns+1) smap stmt
-    in ([Marker "LOOP"] ++ cmds ++ [neg, jmp] ++ scmds ++ [Jnz (Number 1) loop, Marker "ENDWHILE"], ns2, nullValue)
+      (scmds, ns2, ni, nw, _) = _eval (ns+1) curIf (curWhile+1) smap stmt
+    in ([Marker l] ++ cmds ++ [neg, jmp] ++ scmds ++ [Jnz (Number 1) loop, Marker endw], ns2, ni, nw, nullValue)
 
-  _tempEval start smap S.PopBlock = ([Return], start, nullValue)
+  _eval start curIf curWhile smap S.PopBlock = ([Return], start, curIf, curWhile, nullValue)
 
-instance TempEval (S.Block ScopedIdentifier) where
-  _tempEval start smap block =
+instance Eval (S.Block ScopedIdentifier) where
+  _eval curIf curWhile start smap block =
     let
       c = S.constDecls block
       p = S.procDefs block
       b = S.body block
       constCmds = map helper1 c
-      (procCmds, ns1, _) = foldl helper2 ([], start, nullValue) p
+      (procCmds, ns1, ni1, nw1, _) = foldl helper2 ([], start, curIf, curWhile, nullValue) p
       main = Marker "MAIN"
       jumpToMain = Jnz (Number 1) (Named "MAIN")
-      (bodyCmds, ns2, _) = _tempEval ns1 smap b
+      (bodyCmds, ns2, ni2, nw2, _) = _eval ns1 ni1 nw1 smap b
     in
-      (constCmds ++ [jumpToMain] ++ procCmds ++ [main] ++ bodyCmds, ns2, nullValue)
+      (constCmds ++ [jumpToMain] ++ procCmds ++ [main] ++ bodyCmds, ns2, ni2, nw2, nullValue)
 
     where
       helper1 :: (ScopedIdentifier, S.Number) -> ThreeAddr
@@ -283,13 +301,13 @@ instance TempEval (S.Block ScopedIdentifier) where
           Just addr   -> Move (Normal addr) (Number val)
           Nothing     -> error ("unknown symbol: " ++ show id)
 
-      helper2 :: ([ThreeAddr], Int, Value) -> (ScopedIdentifier, S.Block ScopedIdentifier) -> ([ThreeAddr], Int, Value)
-      helper2 (cmds, ns, _) (name, bl) =
+      helper2 :: ([ThreeAddr], Int, Int, Int, Value) -> (ScopedIdentifier, S.Block ScopedIdentifier) -> ([ThreeAddr], Int, Int, Int, Value)
+      helper2 (cmds, ns, ni, nw, _) (name, bl) =
         let
-          (unscoped, nss, _) = _tempEval ns smap bl
+          (unscoped, nss, nis, nws, _) = _eval ns ni nw smap bl
           scoped = map scope unscoped
         in
-          (cmds ++ [Marker $ show name] ++ scoped ++ [Return], nss, nullValue)
+          (cmds ++ [Marker $ show name] ++ scoped ++ [Return], nss, nis, nws, nullValue)
         where
           scope :: ThreeAddr -> ThreeAddr
           scope (Marker mname) = Marker (show name ++ "." ++ mname)
