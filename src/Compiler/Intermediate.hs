@@ -26,7 +26,8 @@ data ScopedIdentifier = ScopedIdentifier [String] S.Identifier
 
 instance Show ScopedIdentifier where
   show (ScopedIdentifier scopes id) =
-    intercalate "." (scopes ++ ["'" ++ id ++ "'"])
+    -- intercalate "." (scopes ++ ["'" ++ id ++ "'"])
+    intercalate "." (scopes ++ [id])
 
 type SymbolMap = Map.Map ScopedIdentifier Int
 
@@ -240,9 +241,24 @@ instance TempEval (S.Statement ScopedIdentifier) where
         let (stmtCmds, ns, _) = _tempEval start smap stmt
         in (cmds ++ stmtCmds, ns, nullValue)
 
-  _tempEval start smap (S.IfStmt cond stmt) = error "todo"
+  _tempEval start smap (S.IfStmt cond stmt) =
+    let
+      (cmds, ns, res) = _tempEval start smap cond
+      neg = Not (Temporary ns) res
+      end = Named "ENDIF"
+      jmp = Jnz (tempV ns) end
+      (scmds, ns2, _) = _tempEval (ns+1) smap stmt
+    in (cmds ++ [neg, jmp] ++ scmds ++ [Marker "ENDIF"], ns2, nullValue)
 
-  _tempEval start smap (S.WhileStmt cond stmt) = error "todo"
+  _tempEval start smap (S.WhileStmt cond stmt) =
+    let
+      (cmds, ns, res) = _tempEval start smap cond
+      neg = Not (Temporary ns) res
+      loop = Named "LOOP"
+      end = Named "ENDWHILE"
+      jmp = Jnz (tempV ns) end
+      (scmds, ns2, _) = _tempEval (ns+1) smap stmt
+    in ([Marker "LOOP"] ++ cmds ++ [neg, jmp] ++ scmds ++ [Jnz (Number 1) loop, Marker "ENDWHILE"], ns2, nullValue)
 
   _tempEval start smap S.PopBlock = ([Return], start, nullValue)
 
@@ -269,5 +285,13 @@ instance TempEval (S.Block ScopedIdentifier) where
 
       helper2 :: ([ThreeAddr], Int, Value) -> (ScopedIdentifier, S.Block ScopedIdentifier) -> ([ThreeAddr], Int, Value)
       helper2 (cmds, ns, _) (name, bl) =
-        let (blockCmds, nss, _) = _tempEval ns smap bl
-        in (cmds ++ [Marker $ show name] ++ blockCmds ++ [Return], nss, nullValue)
+        let
+          (unscoped, nss, _) = _tempEval ns smap bl
+          scoped = map scope unscoped
+        in
+          (cmds ++ [Marker $ show name] ++ scoped ++ [Return], nss, nullValue)
+        where
+          scope :: ThreeAddr -> ThreeAddr
+          scope (Marker mname) = Marker (show name ++ "." ++ mname)
+          scope (Jnz v (Named mname)) = Jnz v (Named (show name ++ "." ++ mname))
+          scope other = other

@@ -67,7 +67,7 @@ data ThreeAddr =
 instance Show ThreeAddr where
   show (Move a v) = "MOV " ++ show a  ++ " " ++ show v
   show (Jnz v l) = "JNZ " ++ show v ++ " " ++ show l
-  show (Arith a v1 op v2) = (map toUpper $ show op) ++ " " ++ show a ++ " " ++ show v1 ++ " " ++ show v2
+  show (Arith a v1 op v2) = map toUpper (show op) ++ " " ++ show a ++ " " ++ show v1 ++ " " ++ show v2
   show (Compare a v1 cmp v2) = show cmp ++ " " ++ show a ++ " " ++ show v1 ++ " " ++ show v2
   show (Not a v) = "NOT " ++ show a ++ " " ++ show v
   show (Odd a v) = "ODD " ++ show a ++ " " ++ show v
