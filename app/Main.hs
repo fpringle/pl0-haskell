@@ -23,14 +23,11 @@ runProgram prog = do
   let Program b = prog
   let machine = interpreter prog
   finalState <- execStateT run machine
-  if hasError finalState
-  then do
+  when (hasError finalState) $ do
     putStrLn "Errors in execution:"
     mapM_ (\e -> putStrLn ("  " ++ e)) $ errors finalState
     putStrLn "Final machine state:"
     prettyPrintScope finalState
-  else do
-    putStrLn "Final variable values:"
     mapM_ (\t -> mapM_ printIfNotNothing (Map.toList $ variables t) >> putStrLn "") $ tables finalState
 
   where printIfNotNothing :: (String, Maybe Int) -> IO ()

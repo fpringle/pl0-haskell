@@ -93,7 +93,7 @@ interpreter (Program b) = pushBlock (Scope [] [] [] False) b
 run :: Interpreter ()
 run = do
   cur <- get
-  case statements cur of
+  unless (hasError cur) $ case statements cur of
     []  -> return ()
     (stmt:rest) -> do
       put $ cur { statements = rest }
@@ -112,11 +112,6 @@ pushBlock s b =
     newts = SymbolTable consts vars funcs : ts
   in
     s { tables = newts, statements = body b:PopBlock:ss }
-
-popBlock :: Scope -> Scope
-popBlock (Scope (t:ts) (s:ss) errs haserr) = Scope ts ss errs haserr
--- popBlock _ = error "trying to pop from main block"
-popBlock s = s
 
 evaluateFactor :: [SymbolTable] -> Factor Identifier -> Either String Int
 evaluateFactor ts (Ident id) = lookupSymbolInTables id ts
@@ -197,7 +192,7 @@ executeStmt (Output exp) = do
   cur <- get
   let ts = tables cur
   case evaluateExpression ts exp of
-    Left error -> appendError error
+    Left error -> lift (putStrLn ("error: " ++ show error)) >> appendError error
     Right val -> lift $ print val
 
 executeStmt (StmtBlock stmts) = modify (\cur -> cur { statements = stmts ++ statements cur})
@@ -216,4 +211,4 @@ executeStmt (WhileStmt cond stmt) = do
     Left err -> appendError err
     Right bool -> when bool $ modify (\cur2 -> cur2 { statements = stmt : WhileStmt cond stmt : statements cur2})
 
-executeStmt PopBlock = modify popBlock
+executeStmt PopBlock = modify (\scope -> scope { tables = tail $ tables scope })
