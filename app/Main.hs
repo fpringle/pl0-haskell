@@ -16,7 +16,7 @@ import Interpreter
 import Compiler
 
 usage :: IO ()
-usage = die "USAGE: pl0 [run/assemble] pl0_file"
+usage = die "USAGE: pl0 [run/compile] pl0_file"
 
 runProgram :: Program Identifier -> IO ()
 runProgram prog = do
@@ -34,8 +34,8 @@ runProgram prog = do
         printIfNotNothing (id, Just val) = putStrLn ("    " ++ id ++ " = " ++ show val)
         printIfNotNothing (id, Nothing) = putStrLn ("    " ++ id ++ " = undefined")
 
-assembleProgram :: Program Identifier -> IO ()
-assembleProgram prog = do
+compileProgram :: Program Identifier -> IO ()
+compileProgram prog = do
   let Program b = prog
   putStrLn "#######################################################"
   putStrLn "ORIGINAL PROGRAM"
@@ -55,15 +55,15 @@ main :: IO ()
 main = do
   args <- getArgs
   when (length args /= 2) usage
-  let [runOrAssemble, progname] = args
-  unless (runOrAssemble `elem` ["run", "assemble"]) usage
+  let [runOrCompile, progname] = args
+  unless (runOrCompile `elem` ["run", "compile"]) usage
   program <- readFile progname
   let tokenlist = parse lexPL0 progname program
   case tokenlist of
     Left err   -> putStrLn ("Error in lexing: " ++ show err)
     Right list -> case parse P.parseProgram progname list of
       Left err -> die ("Error in parsing:" ++ show err)
-      Right prog -> if runOrAssemble == "run"
+      Right prog -> if runOrCompile == "run"
                     then runProgram prog
-                    else assembleProgram prog
+                    else compileProgram prog
 
