@@ -11,6 +11,7 @@ maintainer:             freddyjepringle@gmail.com
 -- category:
 build-type:             Simple
 extra-source-files:     CHANGELOG.md
+extra-doc-files:        spec.ebnf
 
 common deps
   build-depends:        base >=4.12
