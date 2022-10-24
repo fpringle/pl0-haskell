@@ -5,71 +5,38 @@ import Data.Functor ((<&>))
 import qualified Token as T
 import qualified Syntax as S
 
+import Text.Parsec
 
-data Parser = Parser {
-  stack     :: [T.Token]
-  , good    :: Bool
-  , errors  :: [String]
-  }
-
-type ParserT a = State Parser a
-
-parse :: [T.Token] -> Either [String] (S.Program S.Identifier)
-parse tokens =
-  let
-    parser = Parser {
-      stack     = tokens
-      , good    = True
-      , errors  = []
-      }
-    (prog, finalState) = runState parseProgram parser
-  in
-    if good finalState
-    then Right prog
-    else Left $ errors finalState
-
-peek :: ParserT T.Token
-peek = get <&> (head . stack)
-
-empty :: ParserT Bool
-empty = get <&> (null . stack)
-
-pop :: ParserT T.Token
-pop = do
-  cur <- get
-  let (hd:tl) = stack cur
-  put $ cur { stack = tl }
-  return hd
-
-failure :: String -> ParserT ()
-failure err = do
-  cur <- get
-  let nexts = take 10 $ stack cur
-  let errmsg = err ++ "(remaining stack: " ++ show nexts ++ ")"
-  put $ cur { good = False, errors = errors cur ++ [errmsg] }
-
-assertTopEq :: T.Token -> ParserT Bool
+assertTopEq :: T.Token -> Pl0Parser Bool
 assertTopEq token = do
   top <- peek
   let res = top == token
-  unless res $ failure ("expected " ++ show token ++ " but got " ++ show top)
+  unless res $ unexpected ("expected " ++ show token ++ " but got " ++ show top)
   return res
 
-assertTopType :: T.Token -> ParserT Bool
+assertTopType :: T.Token -> Pl0Parser Bool
 assertTopType token = do
   top <- peek
   let res = T.sameType top token
-  unless res $ failure ("expected type " ++ show token ++ " but got " ++ show top)
+  unless res $ unexpected ("expected type " ++ show token ++ " but got " ++ show top)
   return res
 
-popIdent :: ParserT S.Identifier
+popIdent :: Pl0Parser S.Identifier
 popIdent = do
   assertTopType (T.Identifier "")
   ident <- pop
   let T.Identifier id = ident
   return id
 
-parseExprRecursive :: S.Expression S.Identifier -> ParserT (S.Expression S.Identifier)
+type Pl0Parser = Parsec [T.Token] ()
+
+peek :: Pl0Parser T.Token
+peek = try $ lookAhead anyToken
+
+pop :: Pl0Parser T.Token
+pop = anyToken
+
+parseExprRecursive :: S.Expression S.Identifier -> Pl0Parser (S.Expression S.Identifier)
 parseExprRecursive lhs = do
   top <- peek
   case top of
@@ -77,7 +44,7 @@ parseExprRecursive lhs = do
     T.Minus  -> pop >> parseTerm >>= parseExprRecursive . S.BinaryMinus lhs
     _         -> return lhs
 
-parseExpression :: ParserT (S.Expression S.Identifier)
+parseExpression :: Pl0Parser (S.Expression S.Identifier)
 parseExpression = do
   top <- peek
   cons <- case top of
@@ -88,7 +55,7 @@ parseExpression = do
   let lhs = cons term
   parseExprRecursive lhs
 
-parseTermRecursive :: S.Term S.Identifier -> ParserT (S.Term S.Identifier)
+parseTermRecursive :: S.Term S.Identifier -> Pl0Parser (S.Term S.Identifier)
 parseTermRecursive lhs = do
   top <- peek
   case top of
@@ -96,13 +63,13 @@ parseTermRecursive lhs = do
     T.Divide  -> pop >> parseFactor >>= parseTermRecursive . S.Div lhs
     _         -> return lhs
 
-parseTerm :: ParserT (S.Term S.Identifier)
+parseTerm :: Pl0Parser (S.Term S.Identifier)
 parseTerm = do
   fac <- parseFactor
   let lhs = S.SingleFactor fac
   parseTermRecursive lhs
 
-parseFactor :: ParserT (S.Factor S.Identifier)
+parseFactor :: Pl0Parser (S.Factor S.Identifier)
 parseFactor = do
   top <- pop
   case top of
@@ -114,10 +81,10 @@ parseFactor = do
       pop
       return $ S.Parens expr
     _ -> do
-      failure ("bad first token for factor: " ++ show top)
+      unexpected ("bad first token for factor: " ++ show top)
       return $ S.Ident ""
 
-parseOp :: ParserT S.Op
+parseOp :: Pl0Parser S.Op
 parseOp = do
   top <- pop
   case top of
@@ -128,10 +95,10 @@ parseOp = do
     T.GreaterThan       -> return S.OP_GT
     T.GreaterThanEquals -> return S.OP_GTE
     _ -> do
-      failure ("expected comparison operator but got " ++ show top)
+      unexpected ("expected comparison operator but got " ++ show top)
       return (error ("bad comp op: " ++ show top))
 
-parseCondition :: ParserT (S.Condition S.Identifier)
+parseCondition :: Pl0Parser (S.Condition S.Identifier)
 parseCondition = do
   top <- peek
   case top of
@@ -141,7 +108,7 @@ parseCondition = do
       op <- parseOp
       S.Comp lhs op <$> parseExpression
 
-parseStatements :: ParserT [S.Statement S.Identifier]
+parseStatements :: Pl0Parser [S.Statement S.Identifier]
 parseStatements = do
   top <- peek
   case top of
@@ -152,10 +119,10 @@ parseStatements = do
       return (stmt : rest)
     T.End -> pop >> return []
     _ -> do
-      failure ("expected ';' or 'end' but got: " ++ show top)
+      unexpected ("expected ';' or 'end' but got: " ++ show top)
       return []
 
-parseStatement :: ParserT (S.Statement S.Identifier)
+parseStatement :: Pl0Parser (S.Statement S.Identifier)
 parseStatement = do
   top <- peek
   case top of
@@ -191,10 +158,10 @@ parseStatement = do
       pop
       S.WhileStmt cond <$> parseStatement
     _ -> do
-      failure ("bad first token for statement: " ++ show top)
+      unexpected ("bad first token for statement: " ++ show top)
       return (S.Call "")
 
-parseConst :: ParserT (S.Identifier, S.Number)
+parseConst :: Pl0Parser (S.Identifier, S.Number)
 parseConst = do
   assertTopType (T.Identifier "")
   id <- popIdent
@@ -204,7 +171,7 @@ parseConst = do
   let T.Number num = x
   return (id, num)
 
-parseConsts :: ParserT [(S.Identifier, S.Number)]
+parseConsts :: Pl0Parser [(S.Identifier, S.Number)]
 parseConsts = do
   top <- peek
   case top of
@@ -216,7 +183,7 @@ parseConsts = do
     _       -> return []
 
   where
-    helper :: ParserT [(S.Identifier, S.Number)]
+    helper :: Pl0Parser [(S.Identifier, S.Number)]
     helper = do
       next <- pop
       case next of 
@@ -226,13 +193,13 @@ parseConsts = do
           return (one : others)
         T.Semicolon -> return []
         _ -> do
-          failure ("bad first token for const declaration: " ++ show next)
+          unexpected ("bad first token for const declaration: " ++ show next)
           return []
 
-parseVar :: ParserT S.Identifier
+parseVar :: Pl0Parser S.Identifier
 parseVar = popIdent
 
-parseVars :: ParserT [S.Identifier]
+parseVars :: Pl0Parser [S.Identifier]
 parseVars = do
   top <- peek
   case top of
@@ -244,7 +211,7 @@ parseVars = do
     _       -> return []
 
   where
-    helper :: ParserT [S.Identifier]
+    helper :: Pl0Parser [S.Identifier]
     helper = do
       next <- pop
       case next of 
@@ -254,10 +221,10 @@ parseVars = do
           return (one : others)
         T.Semicolon -> return []
         _ -> do
-          failure ("bad first token for const declaration: " ++ show next)
+          unexpected ("bad first token for const declaration: " ++ show next)
           return []
 
-parseProc :: ParserT (S.Identifier, S.Block S.Identifier)
+parseProc :: Pl0Parser (S.Identifier, S.Block S.Identifier)
 parseProc = do
   assertTopType (T.Identifier "")
   ident <- popIdent
@@ -268,7 +235,7 @@ parseProc = do
   pop
   return (ident, block)
 
-parseProcs :: ParserT [(S.Identifier, S.Block S.Identifier)]
+parseProcs :: Pl0Parser [(S.Identifier, S.Block S.Identifier)]
 parseProcs = do
   top <- peek
   case top of
@@ -279,14 +246,14 @@ parseProcs = do
       return (proc : rest)
     _ -> return []
 
-parseBlock :: ParserT (S.Block S.Identifier)
+parseBlock :: Pl0Parser (S.Block S.Identifier)
 parseBlock = do
   consts <- parseConsts
   vars <- parseVars
   procs <- parseProcs
   S.Block consts vars procs <$> parseStatement
 
-parseProgram :: ParserT (S.Program S.Identifier)
+parseProgram :: Pl0Parser (S.Program S.Identifier)
 parseProgram = do
   bl <- parseBlock
   assertTopEq T.Dot
