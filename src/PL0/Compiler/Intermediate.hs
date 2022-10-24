@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
-module Compiler.Intermediate where
+module PL0.Compiler.Intermediate where
 
 import Prelude hiding (LT, GT, EQ)
 import qualified Data.Map as Map
@@ -8,8 +8,8 @@ import Data.Bifunctor
 import Data.Foldable (maximumBy)
 import Data.Ord (comparing)
 
-import qualified Syntax as S
-import Compiler.ThreeAddress
+import qualified PL0.Syntax as S
+import PL0.Compiler.ThreeAddress
 
 
 -- this module needs to turn S.Program -> Program

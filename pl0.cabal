@@ -21,15 +21,16 @@ common deps
 
 library
   import:               deps
-  exposed-modules:      Token
-                        Lexer
-                        Syntax
-                        Parser
-                        Interpreter
-                        Compiler
+  exposed-modules:      PL0
+                        PL0.Token
+                        PL0.Lexer
+                        PL0.Syntax
+                        PL0.Parser
+                        PL0.Interpreter
+                        PL0.Compiler
   -- other-modules:
-                        Compiler.ThreeAddress
-                        Compiler.Intermediate
+                        PL0.Compiler.ThreeAddress
+                        PL0.Compiler.Intermediate
   -- other-extensions:
   build-depends:        base >=4.12
   hs-source-dirs:       src

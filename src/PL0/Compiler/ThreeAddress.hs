@@ -1,4 +1,4 @@
-module Compiler.ThreeAddress where
+module PL0.Compiler.ThreeAddress where
 
 import Numeric (showHex)
 import Data.Char (toUpper)

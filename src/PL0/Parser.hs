@@ -1,8 +1,8 @@
-module Parser where
+module PL0.Parser where
 
 import Control.Monad (unless)
-import qualified Token as T
-import qualified Syntax as S
+import qualified PL0.Token as T
+import qualified PL0.Syntax as S
 
 import Text.Parsec
 

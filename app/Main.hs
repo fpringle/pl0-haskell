@@ -9,11 +9,11 @@ import qualified Data.Map as Map
 
 import Text.Parsec
 
-import Lexer
-import qualified Parser as P
-import Syntax
-import Interpreter
-import Compiler
+import PL0.Lexer
+import qualified PL0.Parser as P
+import PL0.Syntax
+import PL0.Interpreter
+import PL0.Compiler
 
 usage :: IO ()
 usage = die "USAGE: pl0 [run/compile] pl0_file"

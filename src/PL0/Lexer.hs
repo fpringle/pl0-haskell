@@ -1,4 +1,4 @@
-module Lexer where
+module PL0.Lexer where
 
 import Control.Monad (liftM2)
 import Data.Functor (($>))
@@ -6,7 +6,7 @@ import Data.Functor (($>))
 import Text.Parsec
 import Text.Parsec.String
 
-import Token
+import PL0.Token
 
 lexIdent :: Parser Token 
 lexIdent = Identifier <$> liftM2 (:) letter (many (letter <|> digit <|> char '_'))

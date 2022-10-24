@@ -1,5 +1,5 @@
 {-# LANGUAGE TupleSections #-}
-module Interpreter where
+module PL0.Interpreter where
 
 import Control.Monad
 import Control.Monad.Trans.Class
@@ -8,7 +8,7 @@ import Text.Read (readMaybe)
 import Data.Functor ((<&>))
 import qualified Data.Map as Map
 
-import Syntax
+import PL0.Syntax
 
 
 type IdMap a = Map.Map Identifier a

@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
-module Syntax where
+module PL0.Syntax where
 
 
 type Identifier = String

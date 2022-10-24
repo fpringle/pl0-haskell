@@ -1,4 +1,4 @@
-module Compiler
+module PL0.Compiler
   (
     getAllSymbols
     , transformBlock
@@ -7,5 +7,5 @@ module Compiler
     , eval
   ) where
 
-import Compiler.ThreeAddress
-import Compiler.Intermediate
+import PL0.Compiler.ThreeAddress
+import PL0.Compiler.Intermediate

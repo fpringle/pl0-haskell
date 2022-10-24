@@ -1,4 +1,4 @@
-module Token where
+module PL0.Token where
 
 
 data Token =
