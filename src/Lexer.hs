@@ -32,9 +32,9 @@ lexToken =
   <|> (keyword "do" $> Do)
   <|> (keyword "odd" $> Odd)
 
-  <|> (string ":=" $> ColonEquals)
-  <|> (string "<=" $> LessThanEquals)
-  <|> (string ">=" $> GreaterThanEquals)
+  <|> try (string ":=" $> ColonEquals)
+  <|> try (string "<=" $> LessThanEquals)
+  <|> try (string ">=" $> GreaterThanEquals)
 
   <|> (char ',' $> Comma)
   <|> (char ';' $> Semicolon)
