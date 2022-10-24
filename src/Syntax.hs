@@ -76,7 +76,7 @@ data Statement a =
   | StmtBlock [Statement a]
   | IfStmt (Condition a) (Statement a)
   | WhileStmt (Condition a) (Statement a)
-  | PopBlock      -- internall command used to return from procedure call
+  | PopBlock      -- internal command used to return from procedure call
   deriving (Show, Eq, Functor)
 
 data Block a = Block {

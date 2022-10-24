@@ -17,6 +17,7 @@ common deps
                         , containers
                         , mtl
                         , transformers
+                        , parsec
 
 library
   import:               deps

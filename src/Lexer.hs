@@ -74,6 +74,6 @@ lexPL0 "" = Right []
 lexPL0 (other:rest)
   | isSpace other = lexPL0 rest
   | otherwise = do
-  (first, rest) <- lexFirst (other:rest)
-  tl <- lexPL0 rest
+  (first, remainder) <- lexFirst (other:rest)
+  tl <- lexPL0 remainder
   return (first : tl)
