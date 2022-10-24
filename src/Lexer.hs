@@ -32,6 +32,10 @@ lexToken =
   <|> (keyword "do" $> Do)
   <|> (keyword "odd" $> Odd)
 
+  <|> (string ":=" $> ColonEquals)
+  <|> (string "<=" $> LessThanEquals)
+  <|> (string ">=" $> GreaterThanEquals)
+
   <|> (char ',' $> Comma)
   <|> (char ';' $> Semicolon)
   <|> (char '=' $> Equals)
@@ -48,12 +52,8 @@ lexToken =
   <|> (char '(' $> OpenParen)
   <|> (char ')' $> CloseParen)
 
-  <|> (string ":=" $> ColonEquals)
-  <|> (string "<=" $> LessThanEquals)
-  <|> (string ">=" $> GreaterThanEquals)
-
   <|> lexIdent
   <|> lexNumber
 
 lexPL0 :: Parser [Token]
-lexPL0 = sepBy lexToken spaces
+lexPL0 = sepEndBy lexToken spaces
