@@ -1,11 +1,12 @@
 module Parser where
 
-import Control.Monad.State
-import Data.Functor ((<&>))
+import Control.Monad (unless)
 import qualified Token as T
 import qualified Syntax as S
 
 import Text.Parsec
+
+type Pl0Parser = Parsec [T.Token] ()
 
 assertTopEq :: T.Token -> Pl0Parser Bool
 assertTopEq token = do
@@ -27,8 +28,6 @@ popIdent = do
   ident <- pop
   let T.Identifier id = ident
   return id
-
-type Pl0Parser = Parsec [T.Token] ()
 
 peek :: Pl0Parser T.Token
 peek = try $ lookAhead anyToken
@@ -102,7 +101,7 @@ parseCondition :: Pl0Parser (S.Condition S.Identifier)
 parseCondition = do
   top <- peek
   case top of
-    T.Odd -> pop >> parseExpression <&> S.Odd
+    T.Odd -> pop >> S.Odd <$> parseExpression
     _     -> do
       lhs <- parseExpression
       op <- parseOp

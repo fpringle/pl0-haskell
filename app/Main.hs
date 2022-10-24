@@ -18,9 +18,9 @@ main = do
   args <- getArgs
   let progname = head args
   program <- readFile progname
-  let tokenlist = lexPL0 program
+  let tokenlist = parse lexPL0 progname program
   case tokenlist of
-    Left err   -> putStrLn ("Error in lexing: " ++ err)
+    Left err   -> putStrLn ("Error in lexing: " ++ show err)
     Right list -> case parse P.parseProgram progname list of
         Left err -> do
           putStrLn "Error in parsing:"

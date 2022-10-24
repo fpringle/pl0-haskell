@@ -89,8 +89,6 @@ data Block a = Block {
 newtype Program a = Program (Block a)
   deriving (Show, Eq, Functor)
 
-
-
 prettyPrintBlock :: Show a => Block a -> IO ()
 prettyPrintBlock = go 0
   where
