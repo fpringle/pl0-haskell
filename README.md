@@ -2,6 +2,8 @@
 
 Parser, interpreter and compiler (WIP) for [PL/0](https://en.wikipedia.org/wiki/PL/0), an educational programming language designed by Niklaus Wirth.
 
+For documentation, see [here](https://fpringle.github.io/pl0-haskell/).
+
 ## Instructions
 
 Run interpreter with cabal:
