@@ -2,7 +2,8 @@ cabal-version:          2.2
 name:                   pl0
 version:                0.1.0.0
 -- synopsis:
--- description:
+description:            pl0-haskell is a library for tokenizing, lexing, parsing, interpreting and
+                        compiling (WIP) programs written in PL/0, an educational programming languages.
 -- license:             BSD3
 -- license-file:           LICENSE
 author:                 Freddy Pringle
