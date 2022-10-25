@@ -1,3 +1,10 @@
+{-
+Copyright (c) 2022, Frederick Pringle
+All rights reserved.
+
+This source code is licensed under the BSD-style license found in the
+LICENSE file in the root directory of this source tree.
+-}
 -- | The lexing stage of the interpreter/compiler workflow transforms a String into an array of 'Token's.
 module PL0.Lexer (
   -- * Lexing

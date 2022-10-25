@@ -1,3 +1,10 @@
+{-
+Copyright (c) 2022, Frederick Pringle
+All rights reserved.
+
+This source code is licensed under the BSD-style license found in the
+LICENSE file in the root directory of this source tree.
+-}
 {-# LANGUAGE TupleSections #-}
 -- | The PL/0 interpreter is a state machine that executes steps one by one
 -- and updates its own internal memory accordingly.
