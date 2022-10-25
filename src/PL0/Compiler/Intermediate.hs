@@ -1,3 +1,4 @@
+{-# OPTIONS_HADDOCK hide #-}
 {-# LANGUAGE FlexibleInstances #-}
 module PL0.Compiler.Intermediate where
 

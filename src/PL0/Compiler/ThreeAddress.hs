@@ -1,3 +1,4 @@
+{-# OPTIONS_HADDOCK hide #-}
 module PL0.Compiler.ThreeAddress where
 
 import Numeric (showHex)

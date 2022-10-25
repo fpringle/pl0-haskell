@@ -1,4 +1,10 @@
-module PL0.Token where
+-- | PL0.Token exports a datatype 'Token' which represents tokens used in the tokenizing stage.
+module PL0.Token (
+  -- * Tokens used in parsing
+  Token (..)
+  -- * Utility functions
+  , sameType
+  ) where
 
 
 -- | Token is an intermediate datatype used in the tokenizing/lexing stage.

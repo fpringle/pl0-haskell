@@ -1,4 +1,8 @@
-module PL0.Lexer where
+-- | The lexing stage of the interpreter/compiler workflow transforms a String into an array of 'Token's.
+module PL0.Lexer (
+  -- * Lexing
+  lexPL0
+  ) where
 
 import Control.Monad (liftM2)
 import Data.Functor (($>))
@@ -55,5 +59,6 @@ lexToken =
   <|> lexIdent
   <|> lexNumber
 
+-- | A Parser representing a transformation of a String into a series of 'Token's.
 lexPL0 :: Parser [Token]
 lexPL0 = sepEndBy lexToken spaces

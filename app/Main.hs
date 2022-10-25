@@ -12,7 +12,8 @@ import Text.Parsec
 import PL0.Lexer
 import qualified PL0.Parser as P
 import PL0.Syntax
-import PL0.Interpreter
+import PL0.Interpreter hiding (runProgram)
+import qualified PL0.Interpreter as I (runProgram)
 import PL0.Compiler
 
 usage :: IO ()
@@ -20,9 +21,7 @@ usage = die "USAGE: pl0 [run/compile] pl0_file"
 
 runProgram :: Program Identifier -> IO ()
 runProgram prog = do
-  let Program b = prog
-  let machine = interpreter prog
-  finalState <- execStateT run machine
+  finalState <- I.runProgram prog
   when (hasError finalState) $ do
     putStrLn "Errors in execution:"
     mapM_ (\e -> putStrLn ("  " ++ e)) $ errors finalState

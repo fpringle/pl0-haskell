@@ -1,5 +1,23 @@
 {-# LANGUAGE TupleSections #-}
-module PL0.Interpreter where
+-- | The PL/0 interpreter is a state machine that executes steps one by one
+-- and updates its own internal memory accordingly.
+module PL0.Interpreter (
+  -- * Scopes
+  Scope (..)
+  , prettyPrintScope
+
+
+  -- * Symbols
+  , IdMap
+  , SymbolTable (..)
+
+  
+  -- * The interpreter
+  , Interpreter
+  , hasError
+  -- ** Running the interpreter
+  , runProgram
+  ) where
 
 import Control.Monad
 import Control.Monad.Trans.Class
@@ -10,12 +28,16 @@ import qualified Data.Map as Map
 
 import PL0.Syntax
 
-
+-- | A polymorphic type for objects visible in the current scope.
 type IdMap a = Map.Map Identifier a
 
+-- | A representation of all the objects visible in the current scope
 data SymbolTable = SymbolTable {
+  -- | the constants currently visible
   constants         :: IdMap Int
+  -- | the variables (initialized or non-initialized) currently visible
   , variables       :: IdMap (Maybe Int)
+  -- | the procedures currently visible
   , functions       :: IdMap (Block Identifier)
   } deriving (Show)
 
@@ -66,13 +88,21 @@ modifySymbolInTables id val (t:ts) =
       rest <- modifySymbolInTables id val ts
       return (t : rest)
 
+-- | The 'Scope' type represents the current state of the program.
 data Scope = Scope {
+  -- | symbols currentl visible
   tables        :: [SymbolTable]
+  -- | list of statements to execute
   , statements  :: [Statement Identifier]
+  -- | any errors that have been reported
   , errors      :: [String]
-  , hasError    :: Bool
   }
 
+-- | Check if any errors have been reported yet.
+hasError :: Scope -> Bool
+hasError = not . null . errors
+
+-- | Format a scope nicely and print it to stdout.
 prettyPrintScope :: Scope -> IO ()
 prettyPrintScope s = do
   let ts = tables s
@@ -85,10 +115,12 @@ prettyPrintScope s = do
   putStrLn "  procs:"
   mapM_ (\t -> mapM_ (\(f,_) -> putStrLn ("    " ++ f)) (Map.toList $ functions t) >> putStrLn "") ts
 
+-- | A state machine representing the process of executing a PL/0 program.
 type Interpreter a = StateT Scope IO a
 
+-- | Smart constructor for an 'Interpreter'.
 interpreter :: Program Identifier -> Scope
-interpreter (Program b) = pushBlock (Scope [] [] [] False) b
+interpreter (Program b) = pushBlock (Scope [] [] []) b
 
 run :: Interpreter ()
 run = do
@@ -100,6 +132,12 @@ run = do
       -- lift $ putStrLn ("executing statement: " ++ show stmt)
       executeStmt stmt
       run
+
+-- | Run all the steps of a program. 'runProgram' returns an IO action since we may
+-- need to get input from the user and print output to the screen. The IO action returns
+-- the final state of the interpreter.
+runProgram :: Program Identifier -> IO Scope
+runProgram = execStateT run . interpreter
 
 pushBlock :: Scope -> Block Identifier -> Scope
 pushBlock s b =
@@ -157,7 +195,7 @@ evaluateCondition ts (Comp e1 o e2) = do
     OP_HASH -> return (lhs /= rhs)
 
 appendError :: String -> Interpreter ()
-appendError s = modify (\cur -> cur { hasError = True, errors = errors cur ++ [s] })
+appendError s = modify (\cur -> cur { errors = errors cur ++ [s] })
 
 executeStmt :: Statement Identifier -> Interpreter ()
 executeStmt (Set id exp) = do
