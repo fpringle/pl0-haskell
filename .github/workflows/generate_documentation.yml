@@ -2,7 +2,7 @@ name: Generate documentation
 
 on:
     push:
-        branches: [ dev/documentation-action ]
+        branches: [ main ]
 
 jobs:
     build:
@@ -41,4 +41,4 @@ jobs:
               uses: ad-m/github-push-action@master
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
-                  branch: dev/documentation-action
+                  branch: ${{ github.head_ref }}
