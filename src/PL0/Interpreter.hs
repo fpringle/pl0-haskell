@@ -97,7 +97,7 @@ modifySymbolInTables id val (t:ts) =
 
 -- | The 'Scope' type represents the current state of the program.
 data Scope = Scope {
-  -- | symbols currentl visible
+  -- | symbols currently visible
   tables        :: [SymbolTable]
   -- | list of statements to execute
   , statements  :: [Statement Identifier]
