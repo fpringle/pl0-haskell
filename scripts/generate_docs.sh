@@ -1,7 +1,6 @@
 #!/usr/bin/bash
 
-index=$(cabal haddock --enable-documentation | tail -n1)
+index=$(cabal new-haddock --enable-documentation --haddock-html-location='https://hackage.haskell.org/package/$pkg-$version/docs' --haddock-hyperlink-source --haddock-quickjump | tee /dev/stderr | tail -n1)
 doc_dir=$(dirname $index)
-echo $doc_dir
 rm -rf docs
-mv $doc_dir docs
+cp -r $doc_dir docs
