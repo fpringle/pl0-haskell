@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{-
+Copyright (c) 2022, Frederick Pringle
+All rights reserved.
+
+This source code is licensed under the BSD-style license found in the
+LICENSE file in the root directory of this source tree.
+-}</span><span>
+</span><span id="line-8"></span><span class="hs-pragma">{-# OPTIONS_HADDOCK hide #-}</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">PL0.Compiler.ThreeAddress</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">showHex</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Char</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">toUpper</span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">type</span><span> </span><span id="Index"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Index"><span class="hs-identifier hs-var">Index</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">type</span><span> </span><span id="Name"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Name"><span class="hs-identifier hs-var">Name</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">data</span><span> </span><span id="Label"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Label"><span class="hs-identifier hs-var">Label</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-19"></span><span>  </span><span id="Named"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Named"><span class="hs-identifier hs-var">Named</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Command"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Command"><span class="hs-identifier hs-var">Command</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679046541"><span id="local-6989586621679046548"><span class="annot"><span class="annottext">Label -&gt; Label -&gt; Bool
+(Label -&gt; Label -&gt; Bool) -&gt; (Label -&gt; Label -&gt; Bool) -&gt; Eq Label
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Label -&gt; Label -&gt; Bool
+== :: Label -&gt; Label -&gt; Bool
+$c/= :: Label -&gt; Label -&gt; Bool
+/= :: Label -&gt; Label -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679046554"><span id="local-6989586621679046559"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Label"><span class="hs-identifier hs-type">Label</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>  </span><span id="local-6989586621679046564"><span class="annot"><span class="annottext">show :: Label -&gt; Name
+</span><a href="#local-6989586621679046564"><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Named"><span class="hs-identifier hs-type">Named</span></a></span><span> </span><span id="local-6989586621679046566"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679046566"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679046566"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Command"><span class="hs-identifier hs-type">Command</span></a></span><span> </span><span id="local-6989586621679046567"><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679046567"><span class="hs-identifier hs-var">idx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Index -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679046567"><span class="hs-identifier hs-var">idx</span></a></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">data</span><span> </span><span id="Address"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Address"><span class="hs-identifier hs-var">Address</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-28"></span><span>  </span><span id="Normal"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Normal"><span class="hs-identifier hs-var">Normal</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Temporary"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Temporary"><span class="hs-identifier hs-var">Temporary</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679046571"><span id="local-6989586621679046575"><span class="annot"><span class="annottext">Address -&gt; Address -&gt; Bool
+(Address -&gt; Address -&gt; Bool)
+-&gt; (Address -&gt; Address -&gt; Bool) -&gt; Eq Address
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Address -&gt; Address -&gt; Bool
+== :: Address -&gt; Address -&gt; Bool
+$c/= :: Address -&gt; Address -&gt; Bool
+/= :: Address -&gt; Address -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679046579"><span id="local-6989586621679046584"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Address"><span class="hs-identifier hs-type">Address</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-33"></span><span>  </span><span id="local-6989586621679046588"><span class="annot"><span class="annottext">show :: Address -&gt; Name
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Normal"><span class="hs-identifier hs-type">Normal</span></a></span><span> </span><span id="local-6989586621679046589"><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679046589"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;a&quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Index -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679046589"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Temporary"><span class="hs-identifier hs-type">Temporary</span></a></span><span> </span><span id="local-6989586621679046590"><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679046590"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;t&quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Index -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679046590"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">data</span><span> </span><span id="Value"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-var">Value</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-37"></span><span>  </span><span id="Number"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Number"><span class="hs-identifier hs-var">Number</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Addr"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Addr"><span class="hs-identifier hs-var">Addr</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Address"><span class="hs-identifier hs-type">Address</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679046594"><span id="local-6989586621679046598"><span class="annot"><span class="annottext">Value -&gt; Value -&gt; Bool
+(Value -&gt; Value -&gt; Bool) -&gt; (Value -&gt; Value -&gt; Bool) -&gt; Eq Value
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Value -&gt; Value -&gt; Bool
+== :: Value -&gt; Value -&gt; Bool
+$c/= :: Value -&gt; Value -&gt; Bool
+/= :: Value -&gt; Value -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679046602"><span id="local-6989586621679046607"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-type">Value</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>  </span><span id="local-6989586621679046612"><span class="annot"><span class="annottext">show :: Value -&gt; Name
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Number"><span class="hs-identifier hs-type">Number</span></a></span><span> </span><span id="local-6989586621679046613"><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679046613"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;0x&quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Index -&gt; ShowS
+forall a. Integral a =&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showHex</span></span><span> </span><span class="annot"><span class="annottext">Index
+</span><a href="#local-6989586621679046613"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Addr"><span class="hs-identifier hs-type">Addr</span></a></span><span> </span><span id="local-6989586621679046614"><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046614"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Address -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046614"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">data</span><span> </span><span id="Op"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Op"><span class="hs-identifier hs-var">Op</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-46"></span><span>  </span><span id="Add"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Add"><span class="hs-identifier hs-var">Add</span></a></span></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Sub"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Sub"><span class="hs-identifier hs-var">Sub</span></a></span></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Mul"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Mul"><span class="hs-identifier hs-var">Mul</span></a></span></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Div"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Div"><span class="hs-identifier hs-var">Div</span></a></span></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679046620"><span id="local-6989586621679046622"><span id="local-6989586621679046626"><span class="annot"><span class="annottext">Index -&gt; Op -&gt; ShowS
+[Op] -&gt; ShowS
+Op -&gt; Name
+(Index -&gt; Op -&gt; ShowS)
+-&gt; (Op -&gt; Name) -&gt; ([Op] -&gt; ShowS) -&gt; Show Op
+forall a.
+(Index -&gt; a -&gt; ShowS) -&gt; (a -&gt; Name) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Index -&gt; Op -&gt; ShowS
+showsPrec :: Index -&gt; Op -&gt; ShowS
+$cshow :: Op -&gt; Name
+show :: Op -&gt; Name
+$cshowList :: [Op] -&gt; ShowS
+showList :: [Op] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679046629"><span id="local-6989586621679046631"><span class="annot"><span class="annottext">Op -&gt; Op -&gt; Bool
+(Op -&gt; Op -&gt; Bool) -&gt; (Op -&gt; Op -&gt; Bool) -&gt; Eq Op
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Op -&gt; Op -&gt; Bool
+== :: Op -&gt; Op -&gt; Bool
+$c/= :: Op -&gt; Op -&gt; Bool
+/= :: Op -&gt; Op -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">data</span><span> </span><span id="Comp"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Comp"><span class="hs-identifier hs-var">Comp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-53"></span><span>  </span><span id="LT"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#LT"><span class="hs-identifier hs-var">LT</span></a></span></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="LTE"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#LTE"><span class="hs-identifier hs-var">LTE</span></a></span></span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GT"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#GT"><span class="hs-identifier hs-var">GT</span></a></span></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GTE"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#GTE"><span class="hs-identifier hs-var">GTE</span></a></span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="EQ"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#EQ"><span class="hs-identifier hs-var">EQ</span></a></span></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="NE"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#NE"><span class="hs-identifier hs-var">NE</span></a></span></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679046641"><span id="local-6989586621679046643"><span id="local-6989586621679046647"><span class="annot"><span class="annottext">Index -&gt; Comp -&gt; ShowS
+[Comp] -&gt; ShowS
+Comp -&gt; Name
+(Index -&gt; Comp -&gt; ShowS)
+-&gt; (Comp -&gt; Name) -&gt; ([Comp] -&gt; ShowS) -&gt; Show Comp
+forall a.
+(Index -&gt; a -&gt; ShowS) -&gt; (a -&gt; Name) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Index -&gt; Comp -&gt; ShowS
+showsPrec :: Index -&gt; Comp -&gt; ShowS
+$cshow :: Comp -&gt; Name
+show :: Comp -&gt; Name
+$cshowList :: [Comp] -&gt; ShowS
+showList :: [Comp] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679046650"><span id="local-6989586621679046652"><span class="annot"><span class="annottext">Comp -&gt; Comp -&gt; Bool
+(Comp -&gt; Comp -&gt; Bool) -&gt; (Comp -&gt; Comp -&gt; Bool) -&gt; Eq Comp
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: Comp -&gt; Comp -&gt; Bool
+== :: Comp -&gt; Comp -&gt; Bool
+$c/= :: Comp -&gt; Comp -&gt; Bool
+/= :: Comp -&gt; Comp -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">data</span><span> </span><span id="ThreeAddr"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#ThreeAddr"><span class="hs-identifier hs-var">ThreeAddr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-62"></span><span>  </span><span id="Move"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Move"><span class="hs-identifier hs-var">Move</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Address"><span class="hs-identifier hs-type">Address</span></a></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-type">Value</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Jnz"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Jnz"><span class="hs-identifier hs-var">Jnz</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-type">Value</span></a></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Label"><span class="hs-identifier hs-type">Label</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Arith"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Arith"><span class="hs-identifier hs-var">Arith</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Address"><span class="hs-identifier hs-type">Address</span></a></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-type">Value</span></a></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Op"><span class="hs-identifier hs-type">Op</span></a></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-type">Value</span></a></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Compare"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Compare"><span class="hs-identifier hs-var">Compare</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Address"><span class="hs-identifier hs-type">Address</span></a></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-type">Value</span></a></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Comp"><span class="hs-identifier hs-type">Comp</span></a></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-type">Value</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Not"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Not"><span class="hs-identifier hs-var">Not</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Address"><span class="hs-identifier hs-type">Address</span></a></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-type">Value</span></a></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Odd"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Odd"><span class="hs-identifier hs-var">Odd</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Address"><span class="hs-identifier hs-type">Address</span></a></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-type">Value</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Marker"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Marker"><span class="hs-identifier hs-var">Marker</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Print"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Print"><span class="hs-identifier hs-var">Print</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Value"><span class="hs-identifier hs-type">Value</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Read"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Read"><span class="hs-identifier hs-var">Read</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Address"><span class="hs-identifier hs-type">Address</span></a></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Call"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Call"><span class="hs-identifier hs-var">Call</span></a></span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Name"><span class="hs-identifier hs-type">Name</span></a></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Return"><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Return"><span class="hs-identifier hs-var">Return</span></a></span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679046667"><span id="local-6989586621679046690"><span class="annot"><span class="annottext">ThreeAddr -&gt; ThreeAddr -&gt; Bool
+(ThreeAddr -&gt; ThreeAddr -&gt; Bool)
+-&gt; (ThreeAddr -&gt; ThreeAddr -&gt; Bool) -&gt; Eq ThreeAddr
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: ThreeAddr -&gt; ThreeAddr -&gt; Bool
+== :: ThreeAddr -&gt; ThreeAddr -&gt; Bool
+$c/= :: ThreeAddr -&gt; ThreeAddr -&gt; Bool
+/= :: ThreeAddr -&gt; ThreeAddr -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679046694"><span id="local-6989586621679046699"><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#ThreeAddr"><span class="hs-identifier hs-type">ThreeAddr</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-76"></span><span>  </span><span id="local-6989586621679046719"><span class="annot"><span class="annottext">show :: ThreeAddr -&gt; Name
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">show</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Move"><span class="hs-identifier hs-type">Move</span></a></span><span> </span><span id="local-6989586621679046720"><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046720"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679046721"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046721"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;MOV &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Address -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046720"><span class="hs-identifier hs-var">a</span></a></span><span>  </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046721"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-77"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Jnz"><span class="hs-identifier hs-type">Jnz</span></a></span><span> </span><span id="local-6989586621679046722"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046722"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679046723"><span class="annot"><span class="annottext">Label
+</span><a href="#local-6989586621679046723"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;JNZ &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046722"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Label -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Label
+</span><a href="#local-6989586621679046723"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-78"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Arith"><span class="hs-identifier hs-type">Arith</span></a></span><span> </span><span id="local-6989586621679046724"><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046724"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679046725"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046725"><span class="hs-identifier hs-var">v1</span></a></span></span><span> </span><span id="local-6989586621679046726"><span class="annot"><span class="annottext">Op
+</span><a href="#local-6989586621679046726"><span class="hs-identifier hs-var">op</span></a></span></span><span> </span><span id="local-6989586621679046727"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046727"><span class="hs-identifier hs-var">v2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Char) -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char
+</span><span class="hs-identifier hs-var">toUpper</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Op -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Op
+</span><a href="#local-6989586621679046726"><span class="hs-identifier hs-var">op</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Address -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046724"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046725"><span class="hs-identifier hs-var">v1</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046727"><span class="hs-identifier hs-var">v2</span></a></span><span>
+</span><span id="line-79"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Compare"><span class="hs-identifier hs-type">Compare</span></a></span><span> </span><span id="local-6989586621679046728"><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046728"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679046729"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046729"><span class="hs-identifier hs-var">v1</span></a></span></span><span> </span><span id="local-6989586621679046730"><span class="annot"><span class="annottext">Comp
+</span><a href="#local-6989586621679046730"><span class="hs-identifier hs-var">cmp</span></a></span></span><span> </span><span id="local-6989586621679046731"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046731"><span class="hs-identifier hs-var">v2</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Comp -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Comp
+</span><a href="#local-6989586621679046730"><span class="hs-identifier hs-var">cmp</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Address -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046728"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046729"><span class="hs-identifier hs-var">v1</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046731"><span class="hs-identifier hs-var">v2</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Not"><span class="hs-identifier hs-type">Not</span></a></span><span> </span><span id="local-6989586621679046732"><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046732"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679046733"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046733"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;NOT &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Address -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046732"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046733"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-81"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Odd"><span class="hs-identifier hs-type">Odd</span></a></span><span> </span><span id="local-6989586621679046734"><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046734"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679046735"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046735"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;ODD &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Address -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046734"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot; &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046735"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-82"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Marker"><span class="hs-identifier hs-type">Marker</span></a></span><span> </span><span id="local-6989586621679046736"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679046736"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679046736"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;:&quot;</span></span><span>
+</span><span id="line-83"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Print"><span class="hs-identifier hs-type">Print</span></a></span><span> </span><span id="local-6989586621679046737"><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046737"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;PRINT &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Value -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Value
+</span><a href="#local-6989586621679046737"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-84"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Read"><span class="hs-identifier hs-type">Read</span></a></span><span> </span><span id="local-6989586621679046738"><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046738"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;READ &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Address -&gt; Name
+forall a. Show a =&gt; a -&gt; Name
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">Address
+</span><a href="#local-6989586621679046738"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-85"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Compiler.ThreeAddress.html#Call"><span class="hs-identifier hs-type">Call</span></a></span><span> </span><span id="local-6989586621679046739"><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679046739"><span class="hs-identifier hs-var">name</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;CALL &quot;</span></span><span> </span><span class="annot"><span class="annottext">Name -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">Name
+</span><a href="#local-6989586621679046739"><span class="hs-identifier hs-var">name</span></a></span><span>
+</span><span id="line-86"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">ThreeAddr
+</span><a href="PL0.Compiler.ThreeAddress.html#Return"><span class="hs-identifier hs-var">Return</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Name
+</span><span class="hs-string">&quot;RET&quot;</span></span><span>
+</span><span id="line-87"></span></pre></body></html>
