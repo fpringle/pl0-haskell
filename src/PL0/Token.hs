@@ -30,7 +30,7 @@ data Token =
   | While
   | Do
   | Odd
-  
+
   -- punctuation
   | Comma
   | Semicolon

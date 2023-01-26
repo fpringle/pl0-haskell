@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="%24con2tag_J3vvt88Dj4u2PqhIV2pXl3"></span><span class="hs-comment">{-
+Copyright (c) 2022, Frederick Pringle
+All rights reserved.
+
+This source code is licensed under the BSD-style license found in the
+LICENSE file in the root directory of this source tree.
+-}</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- | PL0.Token exports a datatype 'Token' which represents tokens used in the tokenizing stage.</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">PL0.Token</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-10"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Tokens used in parsing</span></span><span>
+</span><span id="line-11"></span><span>  </span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier">Token</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Utility functions</span></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="PL0.Token.html#sameType"><span class="hs-identifier">sameType</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- | Token is an intermediate datatype used in the tokenizing/lexing stage.</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- There are different tokens representing keywords, punctuation, mathematical</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- operators, and atomic values.</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">data</span><span> </span><span id="Token"><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-var">Token</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-comment">-- keywords</span><span>
+</span><span id="line-22"></span><span>  </span><span id="Const"><span class="annot"><a href="PL0.Token.html#Const"><span class="hs-identifier hs-var">Const</span></a></span></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Var"><span class="annot"><a href="PL0.Token.html#Var"><span class="hs-identifier hs-var">Var</span></a></span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Procedure"><span class="annot"><a href="PL0.Token.html#Procedure"><span class="hs-identifier hs-var">Procedure</span></a></span></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Call"><span class="annot"><a href="PL0.Token.html#Call"><span class="hs-identifier hs-var">Call</span></a></span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Begin"><span class="annot"><a href="PL0.Token.html#Begin"><span class="hs-identifier hs-var">Begin</span></a></span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="End"><span class="annot"><a href="PL0.Token.html#End"><span class="hs-identifier hs-var">End</span></a></span></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="If"><span class="annot"><a href="PL0.Token.html#If"><span class="hs-identifier hs-var">If</span></a></span></span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Then"><span class="annot"><a href="PL0.Token.html#Then"><span class="hs-identifier hs-var">Then</span></a></span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="While"><span class="annot"><a href="PL0.Token.html#While"><span class="hs-identifier hs-var">While</span></a></span></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Do"><span class="annot"><a href="PL0.Token.html#Do"><span class="hs-identifier hs-var">Do</span></a></span></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Odd"><span class="annot"><a href="PL0.Token.html#Odd"><span class="hs-identifier hs-var">Odd</span></a></span></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-comment">-- punctuation</span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Comma"><span class="annot"><a href="PL0.Token.html#Comma"><span class="hs-identifier hs-var">Comma</span></a></span></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Semicolon"><span class="annot"><a href="PL0.Token.html#Semicolon"><span class="hs-identifier hs-var">Semicolon</span></a></span></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Equals"><span class="annot"><a href="PL0.Token.html#Equals"><span class="hs-identifier hs-var">Equals</span></a></span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ColonEquals"><span class="annot"><a href="PL0.Token.html#ColonEquals"><span class="hs-identifier hs-var">ColonEquals</span></a></span></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Dot"><span class="annot"><a href="PL0.Token.html#Dot"><span class="hs-identifier hs-var">Dot</span></a></span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Question"><span class="annot"><a href="PL0.Token.html#Question"><span class="hs-identifier hs-var">Question</span></a></span></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Exclamation"><span class="annot"><a href="PL0.Token.html#Exclamation"><span class="hs-identifier hs-var">Exclamation</span></a></span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Hash"><span class="annot"><a href="PL0.Token.html#Hash"><span class="hs-identifier hs-var">Hash</span></a></span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="LessThan"><span class="annot"><a href="PL0.Token.html#LessThan"><span class="hs-identifier hs-var">LessThan</span></a></span></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="LessThanEquals"><span class="annot"><a href="PL0.Token.html#LessThanEquals"><span class="hs-identifier hs-var">LessThanEquals</span></a></span></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GreaterThan"><span class="annot"><a href="PL0.Token.html#GreaterThan"><span class="hs-identifier hs-var">GreaterThan</span></a></span></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GreaterThanEquals"><span class="annot"><a href="PL0.Token.html#GreaterThanEquals"><span class="hs-identifier hs-var">GreaterThanEquals</span></a></span></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Plus"><span class="annot"><a href="PL0.Token.html#Plus"><span class="hs-identifier hs-var">Plus</span></a></span></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Minus"><span class="annot"><a href="PL0.Token.html#Minus"><span class="hs-identifier hs-var">Minus</span></a></span></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Times"><span class="annot"><a href="PL0.Token.html#Times"><span class="hs-identifier hs-var">Times</span></a></span></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Divide"><span class="annot"><a href="PL0.Token.html#Divide"><span class="hs-identifier hs-var">Divide</span></a></span></span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="OpenParen"><span class="annot"><a href="PL0.Token.html#OpenParen"><span class="hs-identifier hs-var">OpenParen</span></a></span></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="CloseParen"><span class="annot"><a href="PL0.Token.html#CloseParen"><span class="hs-identifier hs-var">CloseParen</span></a></span></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-comment">-- values</span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Identifier"><span class="annot"><a href="PL0.Token.html#Identifier"><span class="hs-identifier hs-var">Identifier</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Number"><span class="annot"><a href="PL0.Token.html#Number"><span class="hs-identifier hs-var">Number</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679049970"><span id="local-6989586621679049972"><span id="local-6989586621679049974"><span class="annot"><span class="annottext">Int -&gt; Token -&gt; ShowS
+[Token] -&gt; ShowS
+Token -&gt; String
+(Int -&gt; Token -&gt; ShowS)
+-&gt; (Token -&gt; String) -&gt; ([Token] -&gt; ShowS) -&gt; Show Token
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+showList :: [Token] -&gt; ShowS
+$cshowList :: [Token] -&gt; ShowS
+show :: Token -&gt; String
+$cshow :: Token -&gt; String
+showsPrec :: Int -&gt; Token -&gt; ShowS
+$cshowsPrec :: Int -&gt; Token -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679049965"><span id="local-6989586621679049967"><span class="annot"><span class="annottext">Token -&gt; Token -&gt; Bool
+(Token -&gt; Token -&gt; Bool) -&gt; (Token -&gt; Token -&gt; Bool) -&gt; Eq Token
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+/= :: Token -&gt; Token -&gt; Bool
+$c/= :: Token -&gt; Token -&gt; Bool
+== :: Token -&gt; Token -&gt; Bool
+$c== :: Token -&gt; Token -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- | Check if two tokens are of the same type.</span><span>
+</span><span id="line-61"></span><span class="annot"><a href="PL0.Token.html#sameType"><span class="hs-identifier hs-type">sameType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-type">Token</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-type">Token</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-62"></span><span id="sameType"><span class="annot"><span class="annottext">sameType :: Token -&gt; Token -&gt; Bool
+</span><a href="PL0.Token.html#sameType"><span class="hs-identifier hs-var hs-var">sameType</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Token.html#Identifier"><span class="hs-identifier hs-type">Identifier</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Token.html#Identifier"><span class="hs-identifier hs-type">Identifier</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-63"></span><span class="annot"><a href="PL0.Token.html#sameType"><span class="hs-identifier hs-var">sameType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Token.html#Number"><span class="hs-identifier hs-type">Number</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="PL0.Token.html#Number"><span class="hs-identifier hs-type">Number</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-64"></span><span class="annot"><a href="PL0.Token.html#sameType"><span class="hs-identifier hs-var">sameType</span></a></span><span> </span><span id="local-6989586621679049963"><span class="annot"><span class="annottext">Token
+</span><a href="#local-6989586621679049963"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679049962"><span class="annot"><span class="annottext">Token
+</span><a href="#local-6989586621679049962"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Token
+</span><a href="#local-6989586621679049963"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Token -&gt; Token -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Token
+</span><a href="#local-6989586621679049962"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-65"></span></pre></body></html>

@@ -134,7 +134,7 @@ data Statement a =
   -- | While the condition evaluates to true, execute the statement.
   | WhileStmt (Condition a) (Statement a)
   -- | Internal command used to return from procedure call.
-  | PopBlock      
+  | PopBlock
   deriving (Show, Eq, Functor)
 
 -- | The main body of a PL/0 program is a Block. It contains:

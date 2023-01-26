@@ -19,7 +19,7 @@ import Text.Parsec.String
 
 import PL0.Token
 
-lexIdent :: Parser Token 
+lexIdent :: Parser Token
 lexIdent = Identifier <$> liftM2 (:) letter (many (letter <|> digit <|> char '_'))
 
 lexNumber :: Parser Token

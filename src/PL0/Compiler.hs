@@ -15,5 +15,5 @@ module PL0.Compiler
     , eval
   ) where
 
-import PL0.Compiler.ThreeAddress
 import PL0.Compiler.Intermediate
+import PL0.Compiler.ThreeAddress

@@ -9,15 +9,15 @@ LICENSE file in the root directory of this source tree.
 {-# LANGUAGE FlexibleInstances #-}
 module PL0.Compiler.Intermediate where
 
-import Prelude hiding (LT, GT, EQ)
-import qualified Data.Map as Map
-import Data.List
 import Data.Bifunctor
 import Data.Foldable (maximumBy)
+import Data.List
+import qualified Data.Map as Map
 import Data.Ord (comparing)
+import Prelude hiding (EQ, GT, LT)
 
-import qualified PL0.Syntax as S
 import PL0.Compiler.ThreeAddress
+import qualified PL0.Syntax as S
 
 
 -- this module needs to turn S.Program -> Program
@@ -62,7 +62,7 @@ getBlockSymbols b =
 getAllSymbols :: S.Program S.Identifier -> [ScopedIdentifier]
 getAllSymbols (S.Program b) = getBlockSymbols b
 
-mapSymbolsToAddresses :: [ScopedIdentifier] -> SymbolMap 
+mapSymbolsToAddresses :: [ScopedIdentifier] -> SymbolMap
 mapSymbolsToAddresses ids = Map.fromList $ zip ids [0..]
 
 filterScope :: [ScopedIdentifier] -> S.Identifier -> [ScopedIdentifier]
@@ -124,7 +124,7 @@ class TempEval a where
   --  newStartAddr is the next temp address not used by the expression
   --  address resultAddr contains the result of the expression
   _tempEval :: Int -> SymbolMap -> a -> ([ThreeAddr], Int, Value)
-  
+
   tempEval :: SymbolMap -> a -> ([ThreeAddr], Int, Value)
   tempEval = _tempEval 0
 
@@ -138,7 +138,7 @@ noSym :: ([ThreeAddr], Int) -> ([ThreeAddr], Int, Value)
 noSym (ta, ns) = (ta, ns, tempV ns)
 
 instance TempEval (S.Factor ScopedIdentifier) where
-  _tempEval start smap (S.Ident id) = 
+  _tempEval start smap (S.Ident id) =
     case Map.lookup id smap of
       Just addr -> ([], start, normV addr)
       Nothing   -> error ("unknown symbol: " ++ show id)
@@ -231,7 +231,7 @@ class Eval a where
   --  nextWhile is the index of the next available 'while' label
   --  address resultAddr contains the result of the expression
   _eval :: Int -> Int -> Int -> SymbolMap -> a -> ([ThreeAddr], Int, Int, Int, Value)
-  
+
   eval :: SymbolMap -> a -> ([ThreeAddr], Int, Int, Int, Value)
   eval = _eval 0 0 0
 

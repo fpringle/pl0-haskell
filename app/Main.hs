@@ -1,20 +1,20 @@
 module Main where
 
-import System.Environment
 import Control.Monad
 import Control.Monad.Trans.State
-import System.IO
-import System.Exit
 import qualified Data.Map as Map
+import System.Environment
+import System.Exit
+import System.IO
 
 import Text.Parsec
 
+import PL0.Compiler
+import PL0.Interpreter hiding (runProgram)
+import qualified PL0.Interpreter as I (runProgram)
 import PL0.Lexer
 import qualified PL0.Parser as P
 import PL0.Syntax
-import PL0.Interpreter hiding (runProgram)
-import qualified PL0.Interpreter as I (runProgram)
-import PL0.Compiler
 
 usage :: IO ()
 usage = die "USAGE: pl0 [run/compile] pl0_file"
@@ -65,4 +65,3 @@ main = do
       Right prog -> if runOrCompile == "run"
                     then runProgram prog
                     else compileProgram prog
-

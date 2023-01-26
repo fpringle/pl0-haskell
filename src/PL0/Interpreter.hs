@@ -18,7 +18,7 @@ module PL0.Interpreter (
   , IdMap
   , SymbolTable (..)
 
-  
+
   -- * The interpreter
   , Interpreter
   , hasError
@@ -29,9 +29,9 @@ module PL0.Interpreter (
 import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
-import Text.Read (readMaybe)
 import Data.Functor ((<&>))
 import qualified Data.Map as Map
+import Text.Read (readMaybe)
 
 import PL0.Syntax
 
@@ -59,7 +59,7 @@ lookupSymbolInTable id table =
 
 lookupSymbolInTables :: Identifier -> [SymbolTable] -> Either String Int
 lookupSymbolInTables id [] = Left ("unknown symbol: " ++ id)
-lookupSymbolInTables id (t:ts) = 
+lookupSymbolInTables id (t:ts) =
   case lookupSymbolInTable id t of
     Right num -> Right num
     _         -> lookupSymbolInTables id ts
@@ -72,7 +72,7 @@ lookupFunctionInTable id table =
 
 lookupFunctionInTables :: Identifier -> [SymbolTable] -> Either String (Block Identifier)
 lookupFunctionInTables id [] = Left ("unknown function: " ++ id)
-lookupFunctionInTables id (t:ts) = 
+lookupFunctionInTables id (t:ts) =
   case lookupFunctionInTable id t of
     Right bl  -> Right bl
     _         -> lookupFunctionInTables id ts
@@ -88,7 +88,7 @@ modifySymbolInTable id val table =
 
 modifySymbolInTables :: Identifier -> Int -> [SymbolTable] -> Either String [SymbolTable]
 modifySymbolInTables id val [] = Left ("unknown symbol: " ++ id)
-modifySymbolInTables id val (t:ts) = 
+modifySymbolInTables id val (t:ts) =
   case modifySymbolInTable id val t of
     Right newt -> Right (newt : ts)
     _         -> do

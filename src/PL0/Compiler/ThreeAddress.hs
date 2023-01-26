@@ -8,8 +8,8 @@ LICENSE file in the root directory of this source tree.
 {-# OPTIONS_HADDOCK hide #-}
 module PL0.Compiler.ThreeAddress where
 
-import Numeric (showHex)
 import Data.Char (toUpper)
+import Numeric (showHex)
 
 
 type Index = Int

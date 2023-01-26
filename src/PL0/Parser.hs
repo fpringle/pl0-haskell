@@ -27,8 +27,8 @@ module PL0.Parser (
   ) where
 
 import Control.Monad (unless)
-import qualified PL0.Token as T
 import qualified PL0.Syntax as S
+import qualified PL0.Token as T
 
 import Text.Parsec
 
@@ -220,7 +220,7 @@ parseConsts = do
     helper :: PL0Parser [(S.Identifier, S.Number)]
     helper = do
       next <- pop
-      case next of 
+      case next of
         T.Comma -> do
           one <- parseConst
           others <- helper
@@ -249,7 +249,7 @@ parseVars = do
     helper :: PL0Parser [S.Identifier]
     helper = do
       next <- pop
-      case next of 
+      case next of
         T.Comma -> do
           one <- parseVar
           others <- helper
@@ -285,7 +285,7 @@ parseProcs = do
 -- | Parse a 'S.Block'.
 parseBlock :: PL0Parser (S.Block S.Identifier)
 parseBlock = S.Block <$> parseConsts <*> parseVars <*> parseProcs <*> parseStatement
-  
+
 -- | Parse a 'S.Program'.
 parseProgram :: PL0Parser (S.Program S.Identifier)
 parseProgram = do
