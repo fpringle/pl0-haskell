@@ -1,26 +1,28 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{-
-Copyright (c) 2022, Frederick Pringle
-All rights reserved.
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{-|
+Module      : PL0.Lexer
+Copyright   : (c) Frederick Pringle, 2023
+License     : BSD-3
+Maintainer  : freddyjepringle@gmail.com
 
-This source code is licensed under the BSD-style license found in the
-LICENSE file in the root directory of this source tree.
+The lexing stage of the interpreter/compiler workflow transforms a
+'String' into an array of 'Token's.
 -}</span><span>
-</span><span id="line-8"></span><span class="hs-comment">-- | The lexing stage of the interpreter/compiler workflow transforms a String into an array of 'Token's.</span><span>
-</span><span id="line-9"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">PL0.Lexer</span><span> </span><span class="hs-special">(</span><span>
-</span><span id="line-10"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Lexing</span></span><span>
-</span><span id="line-11"></span><span>  </span><span class="annot"><a href="PL0.Lexer.html#lexPL0"><span class="hs-identifier">lexPL0</span></a></span><span>
-</span><span id="line-12"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-13"></span><span>
-</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">liftM2</span></span><span class="hs-special">)</span><span>
-</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">($&gt;)</span></span><span class="hs-special">)</span><span>
-</span><span id="line-16"></span><span>
-</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Parsec</span></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Parsec.String</span></span><span>
-</span><span id="line-19"></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="PL0.Token.html"><span class="hs-identifier">PL0.Token</span></a></span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">PL0.Lexer</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-12"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Lexing</span></span><span>
+</span><span id="line-13"></span><span>  </span><span class="annot"><a href="PL0.Lexer.html#lexPL0"><span class="hs-identifier">lexPL0</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">liftM2</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">($&gt;)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Parsec</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Parsec.String</span></span><span>
 </span><span id="line-21"></span><span>
-</span><span id="line-22"></span><span class="annot"><a href="PL0.Lexer.html#lexIdent"><span class="hs-identifier hs-type">lexIdent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-type">Token</span></a></span><span>
-</span><span id="line-23"></span><span id="lexIdent"><span class="annot"><span class="annottext">lexIdent :: Parser Token
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="PL0.Token.html"><span class="hs-identifier">PL0.Token</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="annot"><a href="PL0.Lexer.html#lexIdent"><span class="hs-identifier hs-type">lexIdent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-type">Token</span></a></span><span>
+</span><span id="line-25"></span><span id="lexIdent"><span class="annot"><span class="annottext">lexIdent :: Parser Token
 </span><a href="PL0.Lexer.html#lexIdent"><span class="hs-identifier hs-var hs-var">lexIdent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Token
 </span><a href="PL0.Token.html#Identifier"><span class="hs-identifier hs-var">Identifier</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Token)
 -&gt; ParsecT String () Identity String -&gt; Parser Token
@@ -57,9 +59,9 @@ Stream s m Char =&gt;
 Char -&gt; ParsecT s u m Char
 </span><span class="hs-identifier hs-var">char</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'_'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-24"></span><span>
-</span><span id="line-25"></span><span class="annot"><a href="PL0.Lexer.html#lexNumber"><span class="hs-identifier hs-type">lexNumber</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-type">Token</span></a></span><span>
-</span><span id="line-26"></span><span id="lexNumber"><span class="annot"><span class="annottext">lexNumber :: Parser Token
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="annot"><a href="PL0.Lexer.html#lexNumber"><span class="hs-identifier hs-type">lexNumber</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-type">Token</span></a></span><span>
+</span><span id="line-28"></span><span id="lexNumber"><span class="annot"><span class="annottext">lexNumber :: Parser Token
 </span><a href="PL0.Lexer.html#lexNumber"><span class="hs-identifier hs-var hs-var">lexNumber</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Token
 </span><a href="PL0.Token.html#Number"><span class="hs-identifier hs-var">Number</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Token) -&gt; (String -&gt; Int) -&gt; String -&gt; Token
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
@@ -91,7 +93,7 @@ Stream s m Char =&gt;
 Char -&gt; ParsecT s u m Char
 </span><span class="hs-identifier hs-var">char</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'_'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-27"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679050269"><span class="annot"><span class="annottext">number :: ParsecT String u Identity String
+</span><span id="line-29"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679050269"><span class="annot"><span class="annottext">number :: ParsecT String u Identity String
 </span><a href="#local-6989586621679050269"><span class="hs-identifier hs-var hs-var">number</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; String -&gt; String)
 -&gt; ParsecT String u Identity Char
 -&gt; ParsecT String u Identity String
@@ -119,9 +121,9 @@ Stream s m Char =&gt;
 String -&gt; ParsecT s u m String
 </span><span class="hs-identifier hs-var">string</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;0&quot;</span></span><span>
-</span><span id="line-28"></span><span>
-</span><span id="line-29"></span><span class="annot"><a href="PL0.Lexer.html#keyword"><span class="hs-identifier hs-type">keyword</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
-</span><span id="line-30"></span><span id="keyword"><span class="annot"><span class="annottext">keyword :: String -&gt; ParsecT String () Identity String
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="annot"><a href="PL0.Lexer.html#keyword"><span class="hs-identifier hs-type">keyword</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-32"></span><span id="keyword"><span class="annot"><span class="annottext">keyword :: String -&gt; ParsecT String () Identity String
 </span><a href="PL0.Lexer.html#keyword"><span class="hs-identifier hs-var hs-var">keyword</span></a></span></span><span> </span><span id="local-6989586621679050263"><span class="annot"><span class="annottext">String
 </span><a href="#local-6989586621679050263"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ParsecT String () Identity String
 -&gt; ParsecT String () Identity String
@@ -152,17 +154,17 @@ Stream s m Char =&gt;
 Char -&gt; ParsecT s u m Char
 </span><span class="hs-identifier hs-var">char</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'_'</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-31"></span><span>
-</span><span id="line-32"></span><span class="annot"><a href="PL0.Lexer.html#lexToken"><span class="hs-identifier hs-type">lexToken</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-type">Token</span></a></span><span>
-</span><span id="line-33"></span><span id="lexToken"><span class="annot"><span class="annottext">lexToken :: Parser Token
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="annot"><a href="PL0.Lexer.html#lexToken"><span class="hs-identifier hs-type">lexToken</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-type">Token</span></a></span><span>
+</span><span id="line-35"></span><span id="lexToken"><span class="annot"><span class="annottext">lexToken :: Parser Token
 </span><a href="PL0.Lexer.html#lexToken"><span class="hs-identifier hs-var hs-var">lexToken</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-34"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
+</span><span id="line-36"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
 </span><a href="PL0.Lexer.html#keyword"><span class="hs-identifier hs-var">keyword</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;const&quot;</span></span><span> </span><span class="annot"><span class="annottext">ParsecT String () Identity String -&gt; Token -&gt; Parser Token
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Const"><span class="hs-identifier hs-var">Const</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-35"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-37"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
@@ -171,7 +173,7 @@ ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Var"><span class="hs-identifier hs-var">Var</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-36"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-38"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
@@ -180,7 +182,7 @@ ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Procedure"><span class="hs-identifier hs-var">Procedure</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-37"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-39"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
@@ -189,7 +191,7 @@ ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Call"><span class="hs-identifier hs-var">Call</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-38"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-40"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
@@ -198,7 +200,7 @@ ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Begin"><span class="hs-identifier hs-var">Begin</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-39"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-41"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
@@ -207,7 +209,7 @@ ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#End"><span class="hs-identifier hs-var">End</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-40"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-42"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
@@ -216,7 +218,7 @@ ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#If"><span class="hs-identifier hs-var">If</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-41"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-43"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
@@ -225,7 +227,7 @@ ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Then"><span class="hs-identifier hs-var">Then</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-42"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-44"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
@@ -234,7 +236,7 @@ ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#While"><span class="hs-identifier hs-var">While</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-43"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-45"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
@@ -243,7 +245,7 @@ ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Do"><span class="hs-identifier hs-var">Do</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-44"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-46"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; ParsecT String () Identity String
@@ -252,8 +254,8 @@ ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Odd"><span class="hs-identifier hs-var">Odd</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token
@@ -267,7 +269,7 @@ String -&gt; ParsecT s u m String
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#ColonEquals"><span class="hs-identifier hs-var">ColonEquals</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token
@@ -281,7 +283,7 @@ String -&gt; ParsecT s u m String
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#LessThanEquals"><span class="hs-identifier hs-var">LessThanEquals</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-48"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token
@@ -295,8 +297,8 @@ String -&gt; ParsecT s u m String
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#GreaterThanEquals"><span class="hs-identifier hs-var">GreaterThanEquals</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-49"></span><span>
-</span><span id="line-50"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -308,7 +310,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Comma"><span class="hs-identifier hs-var">Comma</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-51"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-53"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -320,7 +322,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Semicolon"><span class="hs-identifier hs-var">Semicolon</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-52"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-54"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -332,7 +334,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Equals"><span class="hs-identifier hs-var">Equals</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-53"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-55"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -344,7 +346,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Dot"><span class="hs-identifier hs-var">Dot</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-54"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -356,7 +358,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Question"><span class="hs-identifier hs-var">Question</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-55"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-57"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -368,7 +370,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Exclamation"><span class="hs-identifier hs-var">Exclamation</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-56"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-58"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -380,7 +382,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Hash"><span class="hs-identifier hs-var">Hash</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-57"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-59"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -392,7 +394,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#LessThan"><span class="hs-identifier hs-var">LessThan</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-58"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -404,7 +406,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#GreaterThan"><span class="hs-identifier hs-var">GreaterThan</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-61"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -416,7 +418,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Plus"><span class="hs-identifier hs-var">Plus</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-60"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-62"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -428,7 +430,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Minus"><span class="hs-identifier hs-var">Minus</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-61"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-63"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -440,7 +442,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Times"><span class="hs-identifier hs-var">Times</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-62"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -452,7 +454,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#Divide"><span class="hs-identifier hs-var">Divide</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-63"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-65"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -464,7 +466,7 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#OpenParen"><span class="hs-identifier hs-var">OpenParen</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-64"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-66"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; ParsecT String () Identity Char
@@ -476,21 +478,21 @@ Char -&gt; ParsecT s u m Char
 forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; b -&gt; f b
 </span><span class="hs-operator hs-var">$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Token
 </span><a href="PL0.Token.html#CloseParen"><span class="hs-identifier hs-var">CloseParen</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-65"></span><span>
-</span><span id="line-66"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser Token
 </span><a href="PL0.Lexer.html#lexIdent"><span class="hs-identifier hs-var">lexIdent</span></a></span><span>
-</span><span id="line-67"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
+</span><span id="line-69"></span><span>  </span><span class="annot"><span class="annottext">Parser Token -&gt; Parser Token -&gt; Parser Token
 forall s u (m :: * -&gt; *) a.
 ParsecT s u m a -&gt; ParsecT s u m a -&gt; ParsecT s u m a
 </span><span class="hs-operator hs-var">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="annottext">Parser Token
 </span><a href="PL0.Lexer.html#lexNumber"><span class="hs-identifier hs-var">lexNumber</span></a></span><span>
-</span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span class="hs-comment">-- | A Parser representing a transformation of a String into a series of 'Token's.</span><span>
-</span><span id="line-70"></span><span class="annot"><a href="PL0.Lexer.html#lexPL0"><span class="hs-identifier hs-type">lexPL0</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-type">Token</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-71"></span><span id="lexPL0"><span class="annot"><span class="annottext">lexPL0 :: Parser [Token]
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- | A Parser representing a transformation of a String into a series of 'Token's.</span><span>
+</span><span id="line-72"></span><span class="annot"><a href="PL0.Lexer.html#lexPL0"><span class="hs-identifier hs-type">lexPL0</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Parser</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="PL0.Token.html#Token"><span class="hs-identifier hs-type">Token</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-73"></span><span id="lexPL0"><span class="annot"><span class="annottext">lexPL0 :: Parser [Token]
 </span><a href="PL0.Lexer.html#lexPL0"><span class="hs-identifier hs-var hs-var">lexPL0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Parser Token -&gt; ParsecT String () Identity () -&gt; Parser [Token]
 forall s (m :: * -&gt; *) t u a sep.
 Stream s m t =&gt;
@@ -499,4 +501,4 @@ ParsecT s u m a -&gt; ParsecT s u m sep -&gt; ParsecT s u m [a]
 </span><a href="PL0.Lexer.html#lexToken"><span class="hs-identifier hs-var">lexToken</span></a></span><span> </span><span class="annot"><span class="annottext">ParsecT String () Identity ()
 forall s (m :: * -&gt; *) u. Stream s m Char =&gt; ParsecT s u m ()
 </span><span class="hs-identifier hs-var">spaces</span></span><span>
-</span><span id="line-72"></span></pre></body></html>
+</span><span id="line-74"></span></pre></body></html>

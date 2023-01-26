@@ -1,13 +1,14 @@
-{-
-Copyright (c) 2022, Frederick Pringle
-All rights reserved.
+{-|
+Module      : PL0
+Copyright   : (c) Frederick Pringle, 2023
+License     : BSD-3
+Maintainer  : freddyjepringle@gmail.com
 
-This source code is licensed under the BSD-style license found in the
-LICENSE file in the root directory of this source tree.
+[PL/0](https://en.wikipedia.org/wiki/PL/0) is an educational programming language.
+This package provides a library of datatypes and functions for tokenizing, lexing, parsing,
+interpreting, and compiling (WIP) PL/0 programs.
 -}
--- | [PL/0](https://en.wikipedia.org/wiki/PL/0) is an educational programming language.
--- This package provides a library of datatypes and functions for tokenizing, lexing, parsing,
--- interpreting, and compiling (WIP) PL/0 programs.
+
 module PL0 (
   -- * Tokenizing and lexing
   module PL0.Token
