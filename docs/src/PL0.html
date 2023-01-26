@@ -1,29 +1,30 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{-
-Copyright (c) 2022, Frederick Pringle
-All rights reserved.
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">{-|
+Module      : PL0
+Copyright   : (c) Frederick Pringle, 2023
+License     : BSD-3
+Maintainer  : freddyjepringle@gmail.com
 
-This source code is licensed under the BSD-style license found in the
-LICENSE file in the root directory of this source tree.
+[PL/0](https://en.wikipedia.org/wiki/PL/0) is an educational programming language.
+This package provides a library of datatypes and functions for tokenizing, lexing, parsing,
+interpreting, and compiling (WIP) PL/0 programs.
 -}</span><span>
-</span><span id="line-8"></span><span class="hs-comment">-- | [PL/0](https://en.wikipedia.org/wiki/PL/0) is an educational programming language.</span><span>
-</span><span id="line-9"></span><span class="hs-comment">-- This package provides a library of datatypes and functions for tokenizing, lexing, parsing,</span><span>
-</span><span id="line-10"></span><span class="hs-comment">-- interpreting, and compiling (WIP) PL/0 programs.</span><span>
-</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">PL0</span><span> </span><span class="hs-special">(</span><span>
-</span><span id="line-12"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Tokenizing and lexing</span></span><span>
-</span><span id="line-13"></span><span>  </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PL0.Token.html"><span class="hs-identifier">PL0.Token</span></a></span><span>
-</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PL0.Lexer.html"><span class="hs-identifier">PL0.Lexer</span></a></span><span>
-</span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Syntax and parsing</span></span><span>
-</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PL0.Syntax.html"><span class="hs-identifier">PL0.Syntax</span></a></span><span>
-</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PL0.Parser.html"><span class="hs-identifier">PL0.Parser</span></a></span><span>
-</span><span id="line-19"></span><span>
-</span><span id="line-20"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Running a PL/0 program</span></span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PL0.Interpreter.html"><span class="hs-identifier">PL0.Interpreter</span></a></span><span>
-</span><span id="line-22"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-23"></span><span>
-</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="PL0.Interpreter.html"><span class="hs-identifier">PL0.Interpreter</span></a></span><span>
-</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="PL0.Lexer.html"><span class="hs-identifier">PL0.Lexer</span></a></span><span>
-</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="PL0.Parser.html"><span class="hs-identifier">PL0.Parser</span></a></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="PL0.Syntax.html"><span class="hs-identifier">PL0.Syntax</span></a></span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="PL0.Token.html"><span class="hs-identifier">PL0.Token</span></a></span><span>
-</span><span id="line-29"></span></pre></body></html>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">PL0</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-13"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Tokenizing and lexing</span></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PL0.Token.html"><span class="hs-identifier">PL0.Token</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PL0.Lexer.html"><span class="hs-identifier">PL0.Lexer</span></a></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Syntax and parsing</span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PL0.Syntax.html"><span class="hs-identifier">PL0.Syntax</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PL0.Parser.html"><span class="hs-identifier">PL0.Parser</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Running a PL/0 program</span></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PL0.Interpreter.html"><span class="hs-identifier">PL0.Interpreter</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="PL0.Interpreter.html"><span class="hs-identifier">PL0.Interpreter</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="PL0.Lexer.html"><span class="hs-identifier">PL0.Lexer</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="PL0.Parser.html"><span class="hs-identifier">PL0.Parser</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="PL0.Syntax.html"><span class="hs-identifier">PL0.Syntax</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="PL0.Token.html"><span class="hs-identifier">PL0.Token</span></a></span><span>
+</span><span id="line-30"></span></pre></body></html>

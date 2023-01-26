@@ -1,13 +1,14 @@
-{-
-Copyright (c) 2022, Frederick Pringle
-All rights reserved.
+{-|
+Module      : PL0.Syntax
+Copyright   : (c) Frederick Pringle, 2023
+License     : BSD-3
+Maintainer  : freddyjepringle@gmail.com
 
-This source code is licensed under the BSD-style license found in the
-LICENSE file in the root directory of this source tree.
+PL/0 follows a typical expression-factor-term model.
+For the full syntax specification in extended Backus-Naur form see [here](spec.ebnf).
 -}
+
 {-# LANGUAGE DeriveFunctor #-}
--- | PL/0 follows a typical expression-factor-term model.
--- For the full syntax specification in extended Backus-Naur form see [here](spec.ebnf).
 
 module PL0.Syntax (
   -- * Structure of a PL/0 program

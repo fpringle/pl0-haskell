@@ -1,13 +1,15 @@
-{-
-Copyright (c) 2022, Frederick Pringle
-All rights reserved.
+{-|
+Module      : PL0.Interpreter
+Copyright   : (c) Frederick Pringle, 2023
+License     : BSD-3
+Maintainer  : freddyjepringle@gmail.com
 
-This source code is licensed under the BSD-style license found in the
-LICENSE file in the root directory of this source tree.
+The PL/0 interpreter is a state machine that executes steps one by one
+and updates its own internal memory accordingly.
 -}
+
 {-# LANGUAGE TupleSections #-}
--- | The PL/0 interpreter is a state machine that executes steps one by one
--- and updates its own internal memory accordingly.
+
 module PL0.Interpreter (
   -- * Scopes
   Scope (..)

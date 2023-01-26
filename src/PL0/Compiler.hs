@@ -1,11 +1,14 @@
-{-
-Copyright (c) 2022, Frederick Pringle
-All rights reserved.
+{-|
+Module      : PL0.Compiler
+Copyright   : (c) Frederick Pringle, 2023
+License     : BSD-3
+Maintainer  : freddyjepringle@gmail.com
 
-This source code is licensed under the BSD-style license found in the
-LICENSE file in the root directory of this source tree.
+Compile PL/0 to machine code.
 -}
+
 {-# OPTIONS_HADDOCK hide #-}
+
 module PL0.Compiler
   (
     getAllSymbols
